@@ -44,6 +44,7 @@ func main() {
 	path, handler := happenedv1connect.NewHappenedServiceHandler(greeter)
 	mux.Handle(path, handler)
 
+	log.Println("baseURL", "localhost:8080"+path)
 	err := http.ListenAndServe(
 		"localhost:8080",
 		h2c.NewHandler(mux, &http2.Server{}),

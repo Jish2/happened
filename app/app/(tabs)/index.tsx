@@ -6,22 +6,39 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { polyfills } from "@/app/polyfill.native";
 import {useEffect, useState} from "react";
-import { HappenedService } from "@/gen/protos/v1/happened_service_pb";
-import { createClient } from "@connectrpc/connect";
+import {GreetRequestSchema, HappenedService} from "@/gen/protos/v1/happened_service_pb";
+import {ConnectError, createClient} from "@connectrpc/connect";
 import { createXHRGrpcWebTransport } from "@/app/custom-transport";
+import { create } from "@bufbuild/protobuf";
 
 polyfills();
 
 export default function HomeScreen() {
-  const [greeting, setGreeting] = useState()
+  const [greeting, setGreeting] = useState("none")
 
   const client = createClient(
       HappenedService,
       createXHRGrpcWebTransport({
-        baseUrl: "https://demo.connectrpc.com",
+        baseUrl: "http://localhost:8080",
       }),
   );
   useEffect(() => {
+
+    (async () => {
+      try {
+        const request = create(GreetRequestSchema, {
+          name: "Andy",
+        })
+
+        const response = await client.greet(request)
+        console.log("response", response)
+        setGreeting(response.greeting)
+      } catch (e) {
+        if (e instanceof ConnectError) {
+          console.error("error calling greet", e.name, e.details, e.cause, e.rawMessage)
+        }
+      }
+    })()
 
   }, [])
 
@@ -36,7 +53,7 @@ export default function HomeScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
+        <ThemedText type="title">Welcome {greeting}!</ThemedText>
         <HelloWave />
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
