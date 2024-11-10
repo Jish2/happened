@@ -38,6 +38,9 @@ const (
 	// HappenedServiceCreateEventProcedure is the fully-qualified name of the HappenedService's
 	// CreateEvent RPC.
 	HappenedServiceCreateEventProcedure = "/happened_service.v1.HappenedService/CreateEvent"
+	// HappenedServiceUploadImageProcedure is the fully-qualified name of the HappenedService's
+	// UploadImage RPC.
+	HappenedServiceUploadImageProcedure = "/happened_service.v1.HappenedService/UploadImage"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -45,12 +48,14 @@ var (
 	happenedServiceServiceDescriptor           = v1.File_protos_v1_happened_service_proto.Services().ByName("HappenedService")
 	happenedServiceGreetMethodDescriptor       = happenedServiceServiceDescriptor.Methods().ByName("Greet")
 	happenedServiceCreateEventMethodDescriptor = happenedServiceServiceDescriptor.Methods().ByName("CreateEvent")
+	happenedServiceUploadImageMethodDescriptor = happenedServiceServiceDescriptor.Methods().ByName("UploadImage")
 )
 
 // HappenedServiceClient is a client for the happened_service.v1.HappenedService service.
 type HappenedServiceClient interface {
 	Greet(context.Context, *connect.Request[v1.GreetRequest]) (*connect.Response[v1.GreetResponse], error)
 	CreateEvent(context.Context, *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error)
+	UploadImage(context.Context, *connect.Request[v1.UploadImageRequest]) (*connect.Response[v1.UploadImageResponse], error)
 }
 
 // NewHappenedServiceClient constructs a client for the happened_service.v1.HappenedService service.
@@ -75,6 +80,12 @@ func NewHappenedServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(happenedServiceCreateEventMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		uploadImage: connect.NewClient[v1.UploadImageRequest, v1.UploadImageResponse](
+			httpClient,
+			baseURL+HappenedServiceUploadImageProcedure,
+			connect.WithSchema(happenedServiceUploadImageMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -82,6 +93,7 @@ func NewHappenedServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 type happenedServiceClient struct {
 	greet       *connect.Client[v1.GreetRequest, v1.GreetResponse]
 	createEvent *connect.Client[v1.CreateEventRequest, v1.CreateEventResponse]
+	uploadImage *connect.Client[v1.UploadImageRequest, v1.UploadImageResponse]
 }
 
 // Greet calls happened_service.v1.HappenedService.Greet.
@@ -94,10 +106,16 @@ func (c *happenedServiceClient) CreateEvent(ctx context.Context, req *connect.Re
 	return c.createEvent.CallUnary(ctx, req)
 }
 
+// UploadImage calls happened_service.v1.HappenedService.UploadImage.
+func (c *happenedServiceClient) UploadImage(ctx context.Context, req *connect.Request[v1.UploadImageRequest]) (*connect.Response[v1.UploadImageResponse], error) {
+	return c.uploadImage.CallUnary(ctx, req)
+}
+
 // HappenedServiceHandler is an implementation of the happened_service.v1.HappenedService service.
 type HappenedServiceHandler interface {
 	Greet(context.Context, *connect.Request[v1.GreetRequest]) (*connect.Response[v1.GreetResponse], error)
 	CreateEvent(context.Context, *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error)
+	UploadImage(context.Context, *connect.Request[v1.UploadImageRequest]) (*connect.Response[v1.UploadImageResponse], error)
 }
 
 // NewHappenedServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -118,12 +136,20 @@ func NewHappenedServiceHandler(svc HappenedServiceHandler, opts ...connect.Handl
 		connect.WithSchema(happenedServiceCreateEventMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	happenedServiceUploadImageHandler := connect.NewUnaryHandler(
+		HappenedServiceUploadImageProcedure,
+		svc.UploadImage,
+		connect.WithSchema(happenedServiceUploadImageMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/happened_service.v1.HappenedService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case HappenedServiceGreetProcedure:
 			happenedServiceGreetHandler.ServeHTTP(w, r)
 		case HappenedServiceCreateEventProcedure:
 			happenedServiceCreateEventHandler.ServeHTTP(w, r)
+		case HappenedServiceUploadImageProcedure:
+			happenedServiceUploadImageHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -139,4 +165,8 @@ func (UnimplementedHappenedServiceHandler) Greet(context.Context, *connect.Reque
 
 func (UnimplementedHappenedServiceHandler) CreateEvent(context.Context, *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("happened_service.v1.HappenedService.CreateEvent is not implemented"))
+}
+
+func (UnimplementedHappenedServiceHandler) UploadImage(context.Context, *connect.Request[v1.UploadImageRequest]) (*connect.Response[v1.UploadImageResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("happened_service.v1.HappenedService.UploadImage is not implemented"))
 }
