@@ -9,3 +9,4 @@ CREATE TABLE events (
     updated_at TIMESTAMP NOT NULL,
     thumbnail TEXT
 );
+
