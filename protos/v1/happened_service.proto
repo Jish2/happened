@@ -6,7 +6,12 @@ package happened_service.v1;
 option go_package = "happenedapi/gen/protos/v1;happenedv1";
 
 service HappenedService {
-  rpc Greet(happened_messages.GreetRequest) returns (happened_messages.GreetResponse) {}
-  rpc CreateEvent(happened_messages.CreateEventRequest) returns (happened_messages.CreateEventResponse) {}
-  rpc UploadImage(happened_messages.UploadImageRequest) returns (happened_messages.UploadImageResponse) {}
+  rpc Greet(happened_messages.GreetRequest)
+    returns (happened_messages.GreetResponse) {}
+
+  rpc CreateEvent(happened_messages.CreateEventRequest)
+    returns (happened_messages.CreateEventResponse) {}
+
+  rpc GetUploadImageURL(happened_messages.GetUploadImageURLRequest)
+    returns (happened_messages.GetUploadImageURLResponse) {}
 }
