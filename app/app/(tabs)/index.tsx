@@ -5,7 +5,6 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { polyfills } from "@/app/polyfill.native";
-import {useState} from "react";
 
 polyfills();
 
