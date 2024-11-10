@@ -1,6 +1,7 @@
 package main
 
 import (
+	"connectrpc.com/connect"
 	"context"
 	"database/sql"
 	"errors"
@@ -12,6 +13,7 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"happenedapi/gen/protos/v1/happenedv1connect"
+	"happenedapi/pkg/auth"
 	"happenedapi/pkg/server"
 	"log"
 	"log/slog"
@@ -77,11 +79,17 @@ func main() {
 
 	// Setup S3 bucket
 	s3Client := s3.NewFromConfig(cfg)
+	// Create server
 	api := server.New(s3Client)
 	mux := http.NewServeMux()
 
-	// Create server
-	path, handler := happenedv1connect.NewHappenedServiceHandler(api)
+	// Create server, register interceptors
+	path, handler := happenedv1connect.NewHappenedServiceHandler(
+		api,
+		connect.WithInterceptors(
+			auth.NewAuthInterceptor(),
+		),
+	)
 	mux.Handle(path, handler)
 
 	logger.Info("server listening", slog.Int("port", Port))
