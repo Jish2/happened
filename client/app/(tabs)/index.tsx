@@ -6,8 +6,30 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 
 import { Text } from "react-native";
+import { createClient } from "@connectrpc/connect";
+import { createXHRGrpcWebTransport } from "@/utils/custom-transport";
+import { useEffect } from "react";
+import { polyfills } from "@/app/polyfills.native";
+import { HappenedService } from "@/gen/protos/v1/happened_service_pb.js";
+
+polyfills();
 
 export default function HomeScreen() {
+  const client = createClient(
+    HappenedService,
+    createXHRGrpcWebTransport({ baseUrl: "http://localhost:8080" }),
+  );
+
+  // useEffect(() => {
+  //   const greet = async () => {
+  //     const response = await client.greet({
+  //       name: "world",
+  //     });
+  //     console.log("response", response);
+  //   };
+  //   // greet();
+  // }, []);
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}

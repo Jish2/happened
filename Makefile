@@ -7,6 +7,7 @@ deps:
 	@go install "google.golang.org/protobuf/cmd/protoc-gen-go@latest"
 	@go install "connectrpc.com/connect/cmd/protoc-gen-connect-go@latest"
 	@go install "github.com/air-verse/air@latest"
+	@npm install -g @connectrpc/protoc-gen-connect-es @bufbuild/protoc-gen-es
 
 
 .PHONY: build
@@ -20,4 +21,4 @@ watch:
 .PHONY: gen
 gen:
 	@buf generate
-
+	
