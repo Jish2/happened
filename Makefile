@@ -23,3 +23,6 @@ gen:
 
 	@cd client; yarn gen
 
+
+.PHONY: tf
+	@terraform -chdir=./terraform apply

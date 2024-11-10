@@ -1,48 +1,21 @@
 package main
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	happenedv1 "happenedapi/gen/protos/v1"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"happenedapi/gen/protos/v1/happenedv1connect"
-	"log"
+	"happenedapi/server"
 	"log/slog"
 	"net/http"
 	"os"
 
-	"connectrpc.com/connect"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 )
 
-// Ensure interface satisfaction
-var _ happenedv1connect.HappenedServiceHandler = (*HappenedServer)(nil)
-
-type HappenedServer struct{}
-
-func (s *HappenedServer) CreateEvent(ctx context.Context, c *connect.Request[happenedv1.CreateEventRequest]) (*connect.Response[happenedv1.CreateEventResponse], error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *HappenedServer) Greet(
-	ctx context.Context,
-	req *connect.Request[happenedv1.GreetRequest]) (*connect.Response[happenedv1.GreetResponse], error) {
-	log.Println("Request headers", req.Header())
-
-	res := connect.NewResponse(&happenedv1.GreetResponse{
-		Greeting: fmt.Sprintf("Hello, %s!", req.Msg.Name),
-	})
-	res.Header().Set("Greet-Version", "v1")
-	return res, nil
-}
-
 func main() {
-	greeter := &HappenedServer{}
+	api := server.New()
 	mux := http.NewServeMux()
 
-	path, handler := happenedv1connect.NewHappenedServiceHandler(greeter)
+	path, handler := happenedv1connect.NewHappenedServiceHandler(api)
 	mux.Handle(path, handler)
 
 	err := http.ListenAndServe(
