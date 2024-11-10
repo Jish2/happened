@@ -1,5 +1,3 @@
-
-
 .PHONY: deps
 deps:
 	@go install "github.com/bufbuild/buf/cmd/buf@latest"
@@ -15,7 +13,7 @@ api:
 
 .PHONY: watch
 watch:
-	@air --build.cmd "make build" --build.bin "./api/bin/api"
+	@air --build.cmd "make api" --build.bin "./api/bin/api"
 
 .PHONY: gen
 gen:

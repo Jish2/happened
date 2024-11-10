@@ -1,97 +1,58 @@
+
+
+
 provider "aws" {
   region = var.region
 }
 
-# Get current user identity
-data "aws_caller_identity" "current" {}
-
-resource "aws_s3_bucket" "happened-images" {
-  bucket = "happened-images"
+# Create IAM user
+resource "aws_iam_user" "admin" {
+  name = "happened-admin"  # Choose your username
+  path = "/"
 }
 
-
-# Disable block public access settings
-resource "aws_s3_bucket_public_access_block" "example" {
-  bucket = aws_s3_bucket.happened-images.id
-
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
+# Create access key
+resource "aws_iam_access_key" "admin" {
+  user = aws_iam_user.admin.name
 }
 
+# Create S3 bucket
+resource "aws_s3_bucket" "happened-bucket" {
+  bucket = "happened-bucket"  # Replace with your desired bucket name
+}
 
-# S3 bucket policy document
-data "aws_iam_policy_document" "s3_limited_access" {
-  # GetObject-only access for all users
+# Block all public access
+resource "aws_s3_bucket_public_access_block" "happened-bucket" {
+  bucket = aws_s3_bucket.happened-bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# Create bucket policy
+data "aws_iam_policy_document" "admin_bucket_policy" {
   statement {
     effect = "Allow"
     actions = [
-      "s3:GetObject"
+      "s3:*"
     ]
     resources = [
-      "${aws_s3_bucket.happened-images.arn}/*"
-    ]
-    principals {
-      type = "AWS"
-      identifiers = ["*"]
-    }
-  }
-
-  # Full access for current user
-  statement {
-    effect = "Allow"
-    actions = [
-      "s3:PutObject",
-      "s3:GetObject",
-      "s3:DeleteObject",
-      "s3:ListBucket",
-      "s3:GetBucketLocation"
-    ]
-    resources = [
-      aws_s3_bucket.happened-images.arn,
-      "${aws_s3_bucket.happened-images.arn}/*"
-    ]
-    principals {
-      type = "AWS"
-      identifiers = [data.aws_caller_identity.current.arn]
-    }
-  }
-}
-
-# Attach policy to S3 bucket
-resource "aws_s3_bucket_policy" "bucket_policy" {
-  bucket = aws_s3_bucket.happened-images.id
-  policy = data.aws_iam_policy_document.s3_limited_access.json
-}
-
-# IAM user policy for additional permissions
-data "aws_iam_policy_document" "user_s3_access" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "s3:ListBucket",
-      "s3:GetObject",
-      "s3:PutObject",
-      "s3:DeleteObject",
-      "s3:GetBucketLocation"
-    ]
-    resources = [
-      aws_s3_bucket.happened-images.arn,
-      "${aws_s3_bucket.happened-images.arn}/*"
+      aws_s3_bucket.happened-bucket.arn,
+      "${aws_s3_bucket.happened-bucket.arn}/*"
     ]
   }
 }
 
-# Create IAM policy
-resource "aws_iam_policy" "user_s3_policy" {
-  name        = "user-s3-limited-access"
-  description = "Policy allowing full access to current user and GetObject for others"
-  policy      = data.aws_iam_policy_document.user_s3_access.json
+
+resource "aws_iam_policy" "admin_bucket_policy" {
+  name = "happened-s3-admin-access"
+  description = "Policy granting admin access to specific S3 buckets"
+  policy      = data.aws_iam_policy_document.admin_bucket_policy.json
 }
 
-# Attach policy to current user
-resource "aws_iam_user_policy_attachment" "attach_s3_access" {
-  user       = data.aws_caller_identity.current.user_id
-  policy_arn = aws_iam_policy.user_s3_policy.arn
+resource "aws_iam_user_policy_attachment" "s3_admin" {
+  user = "happened-admin"
+  policy_arn = aws_iam_policy.admin_bucket_policy.arn
 }
