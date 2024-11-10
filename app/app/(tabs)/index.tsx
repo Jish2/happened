@@ -5,10 +5,27 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { polyfills } from "@/app/polyfill.native";
+import {useEffect, useState} from "react";
+import { HappenedService } from "@/gen/protos/v1/happened_service_pb";
+import { createClient } from "@connectrpc/connect";
+import { createXHRGrpcWebTransport } from "@/app/custom-transport";
 
 polyfills();
 
 export default function HomeScreen() {
+  const [greeting, setGreeting] = useState()
+
+  const client = createClient(
+      HappenedService,
+      createXHRGrpcWebTransport({
+        baseUrl: "https://demo.connectrpc.com",
+      }),
+  );
+  useEffect(() => {
+
+  }, [])
+
+
     return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
