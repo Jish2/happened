@@ -21,3 +21,6 @@ watch:
 gen:
 	@buf generate
 
+
+.PHONY: tf
+	@terraform -chdir=./terraform apply

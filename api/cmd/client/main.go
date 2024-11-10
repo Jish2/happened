@@ -2,24 +2,23 @@ package main
 
 import (
 	"context"
+	happenedv1 "happenedapi/gen/protos/v1"
+	"happenedapi/gen/protos/v1/happenedv1connect"
 	"log"
 	"net/http"
-
-	greetv1 "happenedapi/gen/greet/v1"
-	"happenedapi/gen/greet/v1/greetv1connect"
 
 	"connectrpc.com/connect"
 )
 
 func main() {
-	client := greetv1connect.NewGreetServiceClient(
-		http.DefaultClient,
+
+	client := happenedv1connect.NewHappenedServiceClient(http.DefaultClient,
 		"http://localhost:8080",
 	)
 
 	res, err := client.Greet(
 		context.Background(),
-		connect.NewRequest(&greetv1.GreetRequest{Name: "Jane"}),
+		connect.NewRequest(&happenedv1.GreetRequest{Name: "Jane"}),
 	)
 
 	if err != nil {

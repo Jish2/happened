@@ -15,15 +15,30 @@ message GreetResponse {
 
 
 message CreateEventRequest {
+  string title = 1;
+  string description = 2;
+  string place = 3;
+}
 
+message Event {
+  string title = 1;
 }
 
 message CreateEventResponse {
-
+  Event event = 1;
 }
 
+
+message UploadImageRequest {
+  bytes image = 1;
+}
+
+message UploadImageResponse {
+  string url = 1;
+}
 
 service HappenedService {
   rpc Greet(GreetRequest) returns (GreetResponse) {}
   rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse) {}
+  rpc UploadImage(UploadImageRequest) returns (UploadImageResponse) {}
 }
