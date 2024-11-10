@@ -24,6 +24,7 @@ func New(s3Client *s3.Client) *HappenedServer {
 }
 
 func (s *HappenedServer) UploadImage(ctx context.Context, req *connect.Request[happenedv1.UploadImageRequest]) (*connect.Response[happenedv1.UploadImageResponse], error) {
+
 	//TODO implement me
 	panic("implement me")
 }
