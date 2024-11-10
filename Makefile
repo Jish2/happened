@@ -35,3 +35,5 @@ tf:
 .PHONY: destroy
 destroy:
 	@terraform -chdir=./terraform destroy
+
+
