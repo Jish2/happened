@@ -5,7 +5,7 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"happenedapi/gen/protos/v1/happenedv1connect"
-	"happenedapi/server"
+	"happenedapi/pkg/server"
 	"log/slog"
 	"net/http"
 	"os"

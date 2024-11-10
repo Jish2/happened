@@ -22,5 +22,14 @@ gen:
 	@buf generate
 
 
+.PHONY: init-tf
+
+init-tf:
+	@terraform -chdir=./terraform init
 .PHONY: tf
+tf:
 	@terraform -chdir=./terraform apply
+
+.PHONY: destroy
+destroy:
+	@terraform -chdir=./terraform destroy
