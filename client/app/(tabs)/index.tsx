@@ -1,13 +1,16 @@
-import { Image, StyleSheet, Platform } from "react-native";
-
+import { Image, StyleSheet, Platform, TouchableOpacity } from "react-native";
 import { HelloWave } from "@/components/HelloWave";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-
 import { Text } from "react-native";
+import { SignedIn, SignedOut, useClerk, useUser } from "@clerk/clerk-expo";
+import { Link } from "expo-router";
 
 export default function HomeScreen() {
+  const { user } = useUser();
+  const { signOut } = useClerk();
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
@@ -22,6 +25,22 @@ export default function HomeScreen() {
         <ThemedText type="title">Welcome!</ThemedText>
         <HelloWave />
         <Text className="bg-blue-500 text-white">Baz</Text>
+      </ThemedView>
+      <ThemedView style={styles.titleContainer}>
+        <SignedIn>
+          <Text>Hello {JSON.stringify(user?.phoneNumbers[0].phoneNumber)}</Text>
+          <TouchableOpacity onPress={() => signOut()}>
+            <Text>Sign Out</Text>
+          </TouchableOpacity>
+        </SignedIn>
+        <SignedOut>
+          <Link href="/(auth)/sign-in">
+            <Text>Sign In</Text>
+          </Link>
+          <Link href="/(auth)/sign-up">
+            <Text>Sign Up</Text>
+          </Link>
+        </SignedOut>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Step 1: Try it</ThemedText>
