@@ -4,6 +4,7 @@ import (
 	"connectrpc.com/connect"
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	happenedv1 "happenedapi/gen/protos/v1"
 	"happenedapi/gen/protos/v1/happenedv1connect"
 	"log"
@@ -12,10 +13,14 @@ import (
 // Ensure interface satisfaction
 var _ happenedv1connect.HappenedServiceHandler = (*HappenedServer)(nil)
 
-type HappenedServer struct{}
+type HappenedServer struct {
+	s3Client *s3.Client
+}
 
-func New() *HappenedServer {
-	return &HappenedServer{}
+func New(s3Client *s3.Client) *HappenedServer {
+	return &HappenedServer{
+		s3Client: s3Client,
+	}
 }
 
 func (s *HappenedServer) UploadImage(ctx context.Context, req *connect.Request[happenedv1.UploadImageRequest]) (*connect.Response[happenedv1.UploadImageResponse], error) {
