@@ -9,8 +9,8 @@ deps:
 	@go install "github.com/air-verse/air@latest"
 
 
-.PHONY: build
-build:
+.PHONY: api
+api:
 	@cd api && go build -o ./bin/api ./cmd/api
 
 .PHONY: watch
