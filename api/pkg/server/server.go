@@ -17,16 +17,17 @@ type HappenedServer struct {
 	s3Client *s3.Client
 }
 
+func (s *HappenedServer) GetUploadImageURL(
+	ctx context.Context,
+	req *connect.Request[happenedv1.GetUploadImageURLRequest]) (*connect.Response[happenedv1.GetUploadImageURLResponse], error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func New(s3Client *s3.Client) *HappenedServer {
 	return &HappenedServer{
 		s3Client: s3Client,
 	}
-}
-
-func (s *HappenedServer) UploadImage(ctx context.Context, req *connect.Request[happenedv1.UploadImageRequest]) (*connect.Response[happenedv1.UploadImageResponse], error) {
-
-	//TODO implement me
-	panic("implement me")
 }
 
 func (s *HappenedServer) CreateEvent(ctx context.Context, c *connect.Request[happenedv1.CreateEventRequest]) (*connect.Response[happenedv1.CreateEventResponse], error) {
