@@ -4,12 +4,15 @@ import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { polyfills } from "@/app/polyfill.native";
-import {useEffect, useState} from "react";
-import {GreetRequestSchema, HappenedService} from "@/gen/protos/v1/happened_service_pb";
-import {ConnectError, createClient} from "@connectrpc/connect";
+
+import { useEffect, useState } from "react";
+import { GreetRequestSchema, HappenedService } from "@/gen/protos/v1/happened_service_pb";
+import { ConnectError, createClient } from "@connectrpc/connect";
 import { createXHRGrpcWebTransport } from "@/app/custom-transport";
+// Needed to polyfill TextEncoder/ TextDecoder
+import "fast-text-encoding";
 import { create } from "@bufbuild/protobuf";
+import { polyfills } from "@/app/polyfill.native";
 
 polyfills();
 
@@ -35,7 +38,7 @@ export default function HomeScreen() {
         setGreeting(response.greeting)
       } catch (e) {
         if (e instanceof ConnectError) {
-          console.error("error calling greet", e.name, e.details, e.cause, e.rawMessage)
+          console.error("error calling greet", e.name, e.details, e.cause, e.code)
         }
       }
     })()
