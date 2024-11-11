@@ -1,52 +1,50 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, StyleSheet, Platform, Text } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
-import { useEffect, useState } from "react";
-import { GreetRequestSchema, HappenedService } from "@/gen/protos/v1/happened_service_pb";
-import { ConnectError, createClient } from "@connectrpc/connect";
-import { createXHRGrpcWebTransport } from "@/app/custom-transport";
+import { useEffect, useState } from 'react';
+import { GreetRequestSchema, HappenedService } from '@/gen/protos/v1/happened_service_pb';
+import { ConnectError, createClient } from '@connectrpc/connect';
+import { createXHRGrpcWebTransport } from '@/app/custom-transport';
 // Needed to polyfill TextEncoder/ TextDecoder
-import "fast-text-encoding";
-import { create } from "@bufbuild/protobuf";
-import { polyfills } from "@/app/polyfill.native";
+import 'fast-text-encoding';
+import { create } from '@bufbuild/protobuf';
+import { polyfills } from '@/app/polyfill.native';
 
 polyfills();
 
 export default function HomeScreen() {
-  const [greeting, setGreeting] = useState("none")
+  const [greeting, setGreeting] = useState('none');
 
   const client = createClient(
-      HappenedService,
-      createXHRGrpcWebTransport({
-        baseUrl: "http://localhost:8080",
-      }),
+    HappenedService,
+    createXHRGrpcWebTransport({
+      baseUrl: 'http://localhost:8080',
+    })
   );
   useEffect(() => {
-
-    (async () => {
+    const getData = async () => {
       try {
         const request = create(GreetRequestSchema, {
-          name: "Andy",
-        })
+          name: 'Andy',
+        });
 
-        const response = await client.greet(request)
-        console.log("response", response)
-        setGreeting(response.greeting)
+        const response = await client.greet(request);
+        console.log('response', response);
+        setGreeting(response.greeting);
       } catch (e) {
         if (e instanceof ConnectError) {
-          console.error("error calling greet", e.name, e.details, e.cause, e.code)
+          console.error('error calling greet', e.name, e.details, e.cause, e.code);
         }
       }
-    })()
+    };
+    getData();
+  }, [client]);
 
-  }, [])
-
-
-    return (
+  return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
       headerImage={
@@ -55,6 +53,7 @@ export default function HomeScreen() {
           style={styles.reactLogo}
         />
       }>
+      <Text className="text-red-400">Testing nativewind</Text>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Welcome {greeting}!</ThemedText>
         <HelloWave />

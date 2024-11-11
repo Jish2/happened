@@ -1,4 +1,3 @@
-
 # buf.gen.yaml defines a local generation template.
 # For details, see https://buf.build/docs/configuration/v2/buf-gen-yaml
 version: v2
