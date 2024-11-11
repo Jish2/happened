@@ -1,18 +1,19 @@
 package main
 
 import (
-	"connectrpc.com/connect"
 	"context"
 	"errors"
 	"fmt"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 	happenedv1 "happenedapi/gen/protos/v1"
 	"happenedapi/gen/protos/v1/happenedv1connect"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
+
+	"connectrpc.com/connect"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 // Ensure interface satisfaction
@@ -44,7 +45,6 @@ func main() {
 	path, handler := happenedv1connect.NewHappenedServiceHandler(greeter)
 	mux.Handle(path, handler)
 
-	log.Println("baseURL", "localhost:8080"+path)
 	err := http.ListenAndServe(
 		"localhost:8080",
 		h2c.NewHandler(mux, &http2.Server{}),

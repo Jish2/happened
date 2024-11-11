@@ -4,5 +4,6 @@ module.exports = {
   plugins: ["prettier", "@typescript-eslint"],
   rules: {
     "prettier/prettier": "error",
+    "import/no-unresolved": "off",
   },
 };
