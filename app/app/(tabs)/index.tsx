@@ -1,10 +1,10 @@
-import { Image, StyleSheet, Platform, Text } from 'react-native';
-
+import { Image, StyleSheet, Platform, Text, TouchableOpacity } from 'react-native';
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-
+import { SignedIn, SignedOut, useClerk, useUser } from '@clerk/clerk-expo';
+import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { GreetRequestSchema, HappenedService } from '@/gen/protos/v1/happened_service_pb';
 import { ConnectError, createClient } from '@connectrpc/connect';
@@ -44,6 +44,9 @@ export default function HomeScreen() {
     getData();
   }, [client]);
 
+  const { user } = useUser();
+  const { signOut } = useClerk();
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -53,10 +56,26 @@ export default function HomeScreen() {
           style={styles.reactLogo}
         />
       }>
-      <Text className="text-red-400">Testing nativewind</Text>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Welcome {greeting}!</ThemedText>
         <HelloWave />
+        <Text className="bg-blue-500 text-white">Baz</Text>
+      </ThemedView>
+      <ThemedView style={styles.titleContainer}>
+        <SignedIn>
+          <Text>Hello {JSON.stringify(user?.phoneNumbers[0].phoneNumber)}</Text>
+          <TouchableOpacity onPress={() => signOut()}>
+            <Text>Sign Out</Text>
+          </TouchableOpacity>
+        </SignedIn>
+        <SignedOut>
+          <Link href="/(auth)/sign-in">
+            <Text>Sign In</Text>
+          </Link>
+          <Link href="/(auth)/sign-up">
+            <Text>Sign Up</Text>
+          </Link>
+        </SignedOut>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Step 1: Try it</ThemedText>

@@ -1,6 +1,10 @@
 {
   "cSpell.words": [
+    "bufbuild",
+    "clsx",
+    "connectrpc",
     "Ionicons",
-    "Pressable"
+    "Pressable",
+    "protoc"
   ]
 }
