@@ -1,10 +1,12 @@
 .PHONY: deps
 deps:
-	@go install "github.com/bufbuild/buf/cmd/buf@latest"
-	@go install "github.com/fullstorydev/grpcurl/cmd/grpcurl@latest"
+	@brew install bufbuild/buf/buf
+	@brew install grpcurl
 	@go install "google.golang.org/protobuf/cmd/protoc-gen-go@latest"
 	@go install "connectrpc.com/connect/cmd/protoc-gen-connect-go@latest"
-	@go install "github.com/air-verse/air@latest"
+	@go install "github.com/air-verse/air@v1.61.1"
+	@brew tap hashicorp/tap
+	@brew install hashicorp/tap/terraform
 
 
 .PHONY: api
