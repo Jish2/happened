@@ -12,5 +12,18 @@ output "iam_admin_username" {
   value = aws_iam_access_key.admin.user
 }
 
-# Go to the aws console to get access key id and secret access key
+output "iam_admin_id" {
+  value = aws_iam_access_key.admin.id
+}
+
+output "iam_admin_secret" {
+  value = aws_iam_access_key.admin.secret
+  sensitive = true
+}
+
+output "aws_region" {
+  value = var.region
+}
+
+
 
