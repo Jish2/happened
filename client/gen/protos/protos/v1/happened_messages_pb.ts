@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file protos/v1/happened_messages.proto.
  */
 export const file_protos_v1_happened_messages: GenFile = /*@__PURE__*/
-  fileDesc("CiFwcm90b3MvdjEvaGFwcGVuZWRfbWVzc2FnZXMucHJvdG8SEWhhcHBlbmVkX21lc3NhZ2VzIhwKDEdyZWV0UmVxdWVzdBIMCgRuYW1lGAEgASgJIiEKDUdyZWV0UmVzcG9uc2USEAoIZ3JlZXRpbmcYASABKAkiFgoFRXZlbnQSDQoFdGl0bGUYASABKAkiRwoSQ3JlYXRlRXZlbnRSZXF1ZXN0Eg0KBXRpdGxlGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEg0KBXBsYWNlGAMgASgJIj4KE0NyZWF0ZUV2ZW50UmVzcG9uc2USJwoFZXZlbnQYASABKAsyGC5oYXBwZW5lZF9tZXNzYWdlcy5FdmVudCIaChhHZXRVcGxvYWRJbWFnZVVSTFJlcXVlc3QiMgoZR2V0VXBsb2FkSW1hZ2VVUkxSZXNwb25zZRIVCg1wcmVzaWduZWRfdXJsGAEgASgJQiZaJGhhcHBlbmVkYXBpL2dlbi9wcm90b3MvdjE7aGFwcGVuZWR2MWIGcHJvdG8z");
+  fileDesc("CiFwcm90b3MvdjEvaGFwcGVuZWRfbWVzc2FnZXMucHJvdG8SEWhhcHBlbmVkX21lc3NhZ2VzIhwKDEdyZWV0UmVxdWVzdBIMCgRuYW1lGAEgASgJIiEKDUdyZWV0UmVzcG9uc2USEAoIZ3JlZXRpbmcYASABKAkiFgoFRXZlbnQSDQoFdGl0bGUYASABKAkiRwoSQ3JlYXRlRXZlbnRSZXF1ZXN0Eg0KBXRpdGxlGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEg0KBXBsYWNlGAMgASgJIj4KE0NyZWF0ZUV2ZW50UmVzcG9uc2USJwoFZXZlbnQYASABKAsyGC5oYXBwZW5lZF9tZXNzYWdlcy5FdmVudCIaChhHZXRVcGxvYWRJbWFnZVVSTFJlcXVlc3QiLwoZR2V0VXBsb2FkSW1hZ2VVUkxSZXNwb25zZRISCgp1cGxvYWRfdXJsGAEgASgJQiZaJGhhcHBlbmVkYXBpL2dlbi9wcm90b3MvdjE7aGFwcGVuZWR2MWIGcHJvdG8z");
 
 /**
  * @generated from message happened_messages.GreetRequest
@@ -125,9 +125,9 @@ export const GetUploadImageURLRequestSchema: GenMessage<GetUploadImageURLRequest
  */
 export type GetUploadImageURLResponse = Message<"happened_messages.GetUploadImageURLResponse"> & {
   /**
-   * @generated from field: string presigned_url = 1;
+   * @generated from field: string upload_url = 1;
    */
-  presignedUrl: string;
+  uploadUrl: string;
 };
 
 /**
