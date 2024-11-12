@@ -1,29 +1,17 @@
 syntax = "proto3";
+import "protos/v1/happened_messages.proto";
 
 package happened_service.v1;
 
 option go_package = "happenedapi/gen/protos/v1;happenedv1";
 
-
-message GreetRequest {
-  string name = 1;
-}
-
-message GreetResponse {
-  string greeting = 1;
-}
-
-
-message CreateEventRequest {
-
-}
-
-message CreateEventResponse {
-
-}
-
-
 service HappenedService {
-  rpc Greet(GreetRequest) returns (GreetResponse) {}
-  rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse) {}
+  rpc Greet(happened_messages.GreetRequest)
+    returns (happened_messages.GreetResponse) {}
+
+  rpc CreateEvent(happened_messages.CreateEventRequest)
+    returns (happened_messages.CreateEventResponse) {}
+
+  rpc GetUploadImageURL(happened_messages.GetUploadImageURLRequest)
+    returns (happened_messages.GetUploadImageURLResponse) {}
 }

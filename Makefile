@@ -1,16 +1,16 @@
-
-
 .PHONY: deps
 deps:
-	@go install "github.com/bufbuild/buf/cmd/buf@latest"
-	@go install "github.com/fullstorydev/grpcurl/cmd/grpcurl@latest"
+	@brew install bufbuild/buf/buf
+	@brew install grpcurl
 	@go install "google.golang.org/protobuf/cmd/protoc-gen-go@latest"
 	@go install "connectrpc.com/connect/cmd/protoc-gen-connect-go@latest"
-	@go install "github.com/air-verse/air@latest"
+	@go install "github.com/air-verse/air@v1.61.1"
+	@brew tap hashicorp/tap
+	@brew install hashicorp/tap/terraform
 
 
-.PHONY: build
-build:
+.PHONY: api
+api:
 	@cd api && go build -o ./bin/api ./cmd/api
 
 .PHONY: watch
@@ -22,4 +22,18 @@ gen:
 	@buf generate
 
 	@cd client; yarn gen
+
+
+.PHONY: init-tf
+
+init-tf:
+	@terraform -chdir=./terraform init
+.PHONY: tf
+tf:
+	@terraform -chdir=./terraform apply
+
+.PHONY: destroy
+destroy:
+	@terraform -chdir=./terraform destroy
+
 

@@ -12,7 +12,7 @@
     "ios": "expo start --ios --go",
     "web": "expo start --web --go",
     "android": "expo start --android --go",
-    "gen": "buf generate ../protos"
+    "gen": "buf generate"
   },
   "jest": {
     "preset": "jest-expo"

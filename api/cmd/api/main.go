@@ -2,60 +2,101 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
-	happenedv1 "happenedapi/gen/protos/v1"
+	awsConfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/caarlos0/env/v11"
+	"github.com/joho/godotenv"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"happenedapi/gen/protos/v1/happenedv1connect"
+	"happenedapi/pkg/server"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
 
-	"connectrpc.com/connect"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
+	_ "github.com/jackc/pgx/v5/stdlib" // Import the pgx driver for database/sql
 )
 
-// Ensure interface satisfaction
-var _ happenedv1connect.HappenedServiceHandler = (*HappenedServer)(nil)
-
-type HappenedServer struct{}
-
-func (s *HappenedServer) CreateEvent(ctx context.Context, c *connect.Request[happenedv1.CreateEventRequest]) (*connect.Response[happenedv1.CreateEventResponse], error) {
-	//TODO implement me
-	panic("implement me")
+type Config struct {
+	DbHost string `env:"DB_HOST"`
+	DbUser string `env:"DB_USER"`
+	DbPass string `env:"DB_PASS"`
+	DbName string `env:"DB_NAME"`
+	DbPort int    `env:"DB_PORT"`
 }
 
-func (s *HappenedServer) Greet(
-	ctx context.Context,
-	req *connect.Request[happenedv1.GreetRequest]) (*connect.Response[happenedv1.GreetResponse], error) {
-	log.Println("Request headers", req.Header())
+const (
+	Port = 8080
+)
 
-	res := connect.NewResponse(&happenedv1.GreetResponse{
-		Greeting: fmt.Sprintf("Hello, %s!", req.Msg.Name),
-	})
-	res.Header().Set("Greet-Version", "v1")
-	return res, nil
+func pgConnString(config Config) string {
+	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s",
+		config.DbHost,
+		config.DbPort,
+		config.DbUser,
+		config.DbPass,
+		config.DbName)
 }
 
 func main() {
-	greeter := &HappenedServer{}
+	// Load .env
+	err := godotenv.Load(".env")
+	if err != nil {
+		return
+	}
+
+	// Parse env into config
+	var config Config
+	err = env.Parse(&config)
+	if err != nil {
+		return
+	}
+	logger := slog.Default()
+	logger.Info("config: ", config)
+	connString := pgConnString(config)
+
+	// Setup Dependencies
+	// Postgres
+	db, err := sql.Open("pgx", connString)
+	if err != nil {
+		panic(err)
+	}
+	if err := db.Ping(); err != nil {
+		panic(err)
+	}
+
+	ctx := context.Background()
+	cfg, err := awsConfig.LoadDefaultConfig(ctx)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// Setup S3 bucket
+	s3Client := s3.NewFromConfig(cfg)
+	api := server.New(s3Client)
 	mux := http.NewServeMux()
 
-	path, handler := happenedv1connect.NewHappenedServiceHandler(greeter)
+	// Create server
+	path, handler := happenedv1connect.NewHappenedServiceHandler(api)
 	mux.Handle(path, handler)
 
-	err := http.ListenAndServe(
-		"localhost:8080",
+	logger.Info("server listening", slog.Int("port", Port))
+	err = http.ListenAndServe(
+		fmt.Sprintf("localhost:%d", Port),
 		h2c.NewHandler(mux, &http2.Server{}),
 	)
 
 	if err != nil {
 		if errors.Is(err, http.ErrServerClosed) {
 			slog.Info("shutting down server")
-			os.Exit(1)
+			os.Exit(0)
 		} else {
 			slog.Error("unexpected error", slog.Any("error", err))
+			os.Exit(1)
 		}
 	}
 }
