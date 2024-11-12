@@ -42,7 +42,7 @@ func (s *HappenedServer) GetUploadImageURL(
 
 	log.Println("presignedPutRequest", presignedPutRequest)
 	response := connect.NewResponse(&pb.GetUploadImageURLResponse{
-		PresignedUrl: presignedPutRequest.URL,
+		UploadUrl: presignedPutRequest.URL,
 	})
 
 	return response, nil
