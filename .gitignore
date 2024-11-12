@@ -1,4 +1,4 @@
-/tmp/
+**/tmp/
 /api/bin/
 .idea
 **/.terraform/
