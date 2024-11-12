@@ -15,7 +15,7 @@ build:
 
 .PHONY: watch
 watch:
-	@air --build.cmd "make build" --build.bin "./api/bin/api"
+	@air --build.cmd "make build" --build.bin "./api/bin/api" --build.include_dir api
 
 .PHONY: gen
 gen:
