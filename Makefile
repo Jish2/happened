@@ -14,19 +14,17 @@ api:
 
 .PHONY: watch
 watch:
-	@air --build.cmd "make build" --build.bin "./api/bin/api" --build.include_dir api
+	$(MAKE) -C api watch
 
 .PHONY: gen
 gen:
 	$(MAKE) -C api gen
-
 	@cd client; yarn gen
 
-
 .PHONY: init-tf
-
 init-tf:
 	@terraform -chdir=./terraform init
+
 .PHONY: tf
 tf:
 	@terraform -chdir=./terraform apply
