@@ -24,6 +24,12 @@ type HappenedServer struct {
 	s3Client *s3.Client
 }
 
+func New(s3Client *s3.Client) *HappenedServer {
+	return &HappenedServer{
+		s3Client: s3Client,
+	}
+}
+
 func (s *HappenedServer) GetUploadImageURL(
 	ctx context.Context,
 	req *connect.Request[pb.GetUploadImageURLRequest]) (*connect.Response[pb.GetUploadImageURLResponse], error) {
@@ -46,12 +52,6 @@ func (s *HappenedServer) GetUploadImageURL(
 	})
 
 	return response, nil
-}
-
-func New(s3Client *s3.Client) *HappenedServer {
-	return &HappenedServer{
-		s3Client: s3Client,
-	}
 }
 
 func (s *HappenedServer) CreateEvent(ctx context.Context, c *connect.Request[pb.CreateEventRequest]) (*connect.Response[pb.CreateEventResponse], error) {
