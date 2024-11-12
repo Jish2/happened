@@ -1,7 +1,23 @@
-const { getDefaultConfig } = require("expo/metro-config");
+/* eslint-env node */
+const { getDefaultConfig, mergeConfig } = require("@react-native/metro-config");
 const { withNativeWind } = require("nativewind/metro");
 
-/* eslint-env node */
-const config = getDefaultConfig(__dirname);
+const defaultConfig = getDefaultConfig(__dirname);
 
-module.exports = withNativeWind(config, { input: "./global.css" });
+const config = {
+  transformer: {
+    babelTransformerPath: require.resolve("react-native-svg-transformer"),
+    unstable_allowRequireContext: true,
+  },
+  resolver: {
+    // Connect-ES and Protobuf-ES use package exports
+    // (https://nodejs.org/docs/latest-v12.x/api/packages.html#packages_exports).
+    //
+    // We need to enable support for them in Metro. See https://metrobundler.dev/docs/package-exports/
+    unstable_enablePackageExports: true,
+  },
+};
+
+module.exports = withNativeWind(mergeConfig(defaultConfig, config), {
+  input: "./global.css",
+});

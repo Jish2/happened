@@ -9,9 +9,9 @@ import { useEffect } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import * as SecureStore from "expo-secure-store";
 import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";
-import "react-native-reanimated";
-
+import { CLERK_PUBLISHABLE_KEY } from "@/env";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import "react-native-reanimated";
 
 import "../global.css";
 
@@ -32,11 +32,7 @@ export default function RootLayout() {
     return null;
   }
 
-  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
-
-  if (!publishableKey) {
-    throw new Error("Add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY to your .env file");
-  }
+  console.log(CLERK_PUBLISHABLE_KEY);
 
   const tokenCache = {
     async getToken(key: string) {
@@ -65,7 +61,10 @@ export default function RootLayout() {
   };
 
   return (
-    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+    <ClerkProvider
+      tokenCache={tokenCache}
+      publishableKey={CLERK_PUBLISHABLE_KEY}
+    >
       <ClerkLoaded>
         <ThemeProvider
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
@@ -75,8 +74,6 @@ export default function RootLayout() {
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>
-
-          {/* <Slot /> */}
         </ThemeProvider>
       </ClerkLoaded>
     </ClerkProvider>
