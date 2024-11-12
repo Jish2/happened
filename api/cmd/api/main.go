@@ -47,14 +47,14 @@ func main() {
 	// Load .env
 	err := godotenv.Load(".env")
 	if err != nil {
-		return
+		log.Fatalln(err)
 	}
 
 	// Parse env into config
 	var config Config
 	err = env.Parse(&config)
 	if err != nil {
-		return
+		log.Fatalln(err)
 	}
 	logger := slog.Default()
 	logger.Info("config: ", config)
@@ -64,10 +64,10 @@ func main() {
 	// Postgres
 	db, err := sql.Open("pgx", connString)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 	if err := db.Ping(); err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
 	ctx := context.Background()
@@ -82,7 +82,6 @@ func main() {
 	mux := http.NewServeMux()
 
 	// Create server
-
 	path, handler := happenedv1connect.NewHappenedServiceHandler(api)
 	mux.Handle(path, handler)
 	log.Println(happenedv1connect.HappenedServiceName)
