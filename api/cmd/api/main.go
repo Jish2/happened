@@ -1,6 +1,7 @@
 package main
 
 import (
+	"connectrpc.com/grpcreflect"
 	"context"
 	"database/sql"
 	"errors"
@@ -81,10 +82,20 @@ func main() {
 	mux := http.NewServeMux()
 
 	// Create server
+
 	path, handler := happenedv1connect.NewHappenedServiceHandler(api)
 	mux.Handle(path, handler)
+	log.Println(happenedv1connect.HappenedServiceName)
+	reflector := grpcreflect.NewStaticReflector(
+		happenedv1connect.HappenedServiceName,
+	)
+	mux.Handle(grpcreflect.NewHandlerV1(reflector))
+	mux.Handle(grpcreflect.NewHandlerV1Alpha(reflector))
 
-	logger.Info("server listening", slog.Int("port", Port))
+	logger.Info("server listening",
+		slog.Int("port", Port),
+		slog.String("path", path),
+	)
 	err = http.ListenAndServe(
 		fmt.Sprintf("localhost:%d", Port),
 		h2c.NewHandler(mux, &http2.Server{}),
