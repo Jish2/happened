@@ -1,18 +1,19 @@
 package main
 
 import (
-	"connectrpc.com/connect"
 	"context"
 	"errors"
 	"fmt"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 	happenedv1 "happenedapi/gen/protos/v1"
 	"happenedapi/gen/protos/v1/happenedv1connect"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
+
+	"connectrpc.com/connect"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 // Ensure interface satisfaction

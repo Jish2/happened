@@ -21,3 +21,5 @@ watch:
 gen:
 	@buf generate
 
+	@cd client; yarn gen
+

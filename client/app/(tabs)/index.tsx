@@ -1,13 +1,67 @@
-import { Image, StyleSheet, Platform } from "react-native";
-
+import {
+  Image,
+  StyleSheet,
+  Platform,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import { HelloWave } from "@/components/HelloWave";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { SignedIn, SignedOut, useClerk, useUser } from "@clerk/clerk-expo";
+import { Link } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  GreetRequestSchema,
+  HappenedService,
+} from "@/gen/protos/v1/happened_service_pb";
+import { ConnectError, createClient } from "@connectrpc/connect";
+import { createXHRGrpcWebTransport } from "@/app/custom-transport";
+// Needed to polyfill TextEncoder/ TextDecoder
+import "fast-text-encoding";
+import { create } from "@bufbuild/protobuf";
+import { polyfills } from "@/app/polyfill.native";
 
-import { Text } from "react-native";
+polyfills();
 
 export default function HomeScreen() {
+  const [greeting, setGreeting] = useState("none");
+
+  const client = createClient(
+    HappenedService,
+    createXHRGrpcWebTransport({
+      baseUrl: "http://localhost:8080",
+    }),
+  );
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const request = create(GreetRequestSchema, {
+          name: "Andy",
+        });
+
+        const response = await client.greet(request);
+        console.log("response", response);
+        setGreeting(response.greeting);
+      } catch (e) {
+        if (e instanceof ConnectError) {
+          console.error(
+            "error calling greet",
+            e.name,
+            e.details,
+            e.cause,
+            e.code,
+          );
+        }
+      }
+    };
+    getData();
+  }, [client]);
+
+  const { user } = useUser();
+  const { signOut } = useClerk();
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
@@ -19,9 +73,25 @@ export default function HomeScreen() {
       }
     >
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
+        <ThemedText type="title">Welcome {greeting}!</ThemedText>
         <HelloWave />
         <Text className="bg-blue-500 text-white">Baz</Text>
+      </ThemedView>
+      <ThemedView style={styles.titleContainer}>
+        <SignedIn>
+          <Text>Hello {JSON.stringify(user?.phoneNumbers[0].phoneNumber)}</Text>
+          <TouchableOpacity onPress={() => signOut()}>
+            <Text>Sign Out</Text>
+          </TouchableOpacity>
+        </SignedIn>
+        <SignedOut>
+          <Link href="/(auth)/sign-in">
+            <Text>Sign In</Text>
+          </Link>
+          <Link href="/(auth)/sign-up">
+            <Text>Sign Up</Text>
+          </Link>
+        </SignedOut>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Step 1: Try it</ThemedText>
