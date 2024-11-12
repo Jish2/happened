@@ -5,14 +5,13 @@ import { useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import * as SecureStore from 'expo-secure-store';
 import { ClerkLoaded, ClerkProvider } from '@clerk/clerk-expo';
-import 'react-native-reanimated';
-
+import { CLERK_PUBLISHABLE_KEY } from '@/env';
 import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+import 'react-native-reanimated';
 
 import '../global.css';
 
+// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -29,15 +28,7 @@ export default function RootLayout() {
     return null;
   }
 
-  const publishableKey =
-    process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY! ||
-    'pk_test_aWRlYWwtc3dhbi0zMy5jbGVyay5hY2NvdW50cy5kZXYk';
-
-  console.log(process.env, process.env.EXPO_PUBLIC_API_KEY);
-
-  if (!publishableKey) {
-    throw new Error('Add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY to your .env file');
-  }
+  console.log(CLERK_PUBLISHABLE_KEY);
 
   const tokenCache = {
     async getToken(key: string) {
@@ -66,7 +57,7 @@ export default function RootLayout() {
   };
 
   return (
-    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+    <ClerkProvider tokenCache={tokenCache} publishableKey={CLERK_PUBLISHABLE_KEY}>
       <ClerkLoaded>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack>
