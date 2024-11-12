@@ -12,12 +12,11 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"happenedapi/gen/protos/v1/happenedv1connect"
-	"happenedapi/server"
+	"happenedapi/pkg/server"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
-
 
 	_ "github.com/jackc/pgx/v5/stdlib" // Import the pgx driver for database/sql
 )
