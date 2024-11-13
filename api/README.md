@@ -4,8 +4,8 @@ Example code for server and client.
 
 Start server using make watch
 
-```
 Using HTTP
+```
 curl \
     --header "Content-Type: application/json" \
     --data '{"name": "Jane"}' \
