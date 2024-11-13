@@ -37,11 +37,9 @@ export default function HomeScreen() {
   useEffect(() => {
     const getData = async () => {
       try {
-        const request = create(GreetRequestSchema, {
+        const response = await client.greet({
           name: "Andy",
         });
-
-        const response = await client.greet(request);
         console.log("response", response);
         setGreeting(response.greeting);
       } catch (e) {
