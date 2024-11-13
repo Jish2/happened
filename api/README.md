@@ -4,15 +4,14 @@ Example code for server and client.
 
 Start server using make watch
 
-HTTP interface
-
+Using HTTP
 curl \
     --header "Content-Type: application/json" \
     --data '{"name": "Jane"}' \
-    http://localhost:8080/greet.v1.GreetService/Greet
-gRPC interface
-
+    http://localhost:8080/happened_service.v1.HappenedService/Greet
+    
+Using gRPC
 grpcurl \
     -protoset <(buf build -o -) -plaintext \
     -d '{"name": "Jane"}' \
-    localhost:8080 greet.v1.GreetService/Greet
+    localhost:8080 greet_service.v1.HappenedService/Greet
