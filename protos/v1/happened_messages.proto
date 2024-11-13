@@ -25,5 +25,5 @@ message CreateEventResponse {
 
 message GetUploadImageURLRequest {}
 message GetUploadImageURLResponse {
-  string presigned_url = 1;
+  string upload_url = 1;
 }

@@ -4,9 +4,12 @@ go 1.22.2
 
 require (
 	connectrpc.com/connect v1.17.0
+	connectrpc.com/grpcreflect v1.2.0
+	github.com/aws/aws-sdk-go-v2 v1.32.4
 	github.com/aws/aws-sdk-go-v2/config v1.28.3
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.66.3
 	github.com/caarlos0/env/v11 v11.2.2
+	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/joho/godotenv v1.5.1
 	golang.org/x/net v0.31.0
@@ -14,7 +17,6 @@ require (
 )
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.32.4 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.6 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.44 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.19 // indirect
@@ -35,7 +37,6 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.22.1 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect

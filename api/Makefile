@@ -10,4 +10,4 @@ gen:
 
 .PHONY: watch
 watch:
-	@air --build.cmd "make build" --build.bin "./bin/api"
+	@air --build.cmd "make api" --build.bin "./bin/api"
