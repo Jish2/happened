@@ -2,7 +2,7 @@
 
 
 provider "aws" {
-  region = var.region
+  region = var.aws-region
 }
 
 # Create IAM user
@@ -55,4 +55,25 @@ resource "aws_iam_policy" "admin_bucket_policy" {
 resource "aws_iam_user_policy_attachment" "s3_admin" {
   user = "happened-admin"
   policy_arn = aws_iam_policy.admin_bucket_policy.arn
+}
+
+
+// Cloud run
+module "service_account" {
+  source     = "terraform-google-modules/service-accounts/google"
+  version    = "~> 4.2"
+  project_id = var.project_id
+  prefix     = "sa-cloud-run"
+  names      = ["simple"]
+}
+
+module "cloud_run" {
+  source  = "GoogleCloudPlatform/cloud-run/google"
+  version = "~> 0.13"
+
+  service_name          = "happened-service"
+  project_id            = var.project_id
+  location              = "us-west1"
+  image                 = "docker.io/anmho/happened:latest"
+  service_account_email = module.service_account.email
 }

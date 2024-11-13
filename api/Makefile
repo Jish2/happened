@@ -8,6 +8,19 @@ api:
 gen:
 	@buf generate
 
+.PHONY: run
+run:
+	@./bin/api -stage development
+
 .PHONY: watch
 watch:
-	@air --build.cmd "make build" --build.bin "./bin/api"
+	@air --build.cmd "make api" --build.bin "make run"
+
+.PHONY: image
+image:
+	@docker build --platform linux/amd64 -t anmho/happened -f Dockerfile  .
+
+.PHONY: push
+push: image
+	@docker push anmho/happened
+	
