@@ -12,28 +12,12 @@ import { ThemedView } from "@/components/ThemedView";
 import { SignedIn, SignedOut, useClerk, useUser } from "@clerk/clerk-expo";
 import { Link } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  GreetRequestSchema,
-  HappenedService,
-} from "@/gen/protos/v1/happened_service_pb";
-import { ConnectError, createClient } from "@connectrpc/connect";
-import { createXHRGrpcWebTransport } from "@/app/custom-transport";
-// Needed to polyfill TextEncoder/ TextDecoder
-import "fast-text-encoding";
-import { create } from "@bufbuild/protobuf";
-import { polyfills } from "@/app/polyfill.native";
-
-polyfills();
+import { ConnectError } from "@connectrpc/connect";
+import { client } from "@/app/client";
 
 export default function HomeScreen() {
   const [greeting, setGreeting] = useState("none");
 
-  const client = createClient(
-    HappenedService,
-    createXHRGrpcWebTransport({
-      baseUrl: "http://localhost:8080",
-    }),
-  );
   useEffect(() => {
     const getData = async () => {
       try {
@@ -55,7 +39,7 @@ export default function HomeScreen() {
       }
     };
     getData();
-  }, [client]);
+  }, []);
 
   const { user } = useUser();
   const { signOut } = useClerk();

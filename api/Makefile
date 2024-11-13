@@ -8,9 +8,13 @@ api:
 gen:
 	@buf generate
 
+.PHONY: run
+run:
+	@./bin/api -stage development
+
 .PHONY: watch
 watch:
-	@air --build.cmd "make api" --build.bin "./bin/api"
+	@air --build.cmd "make api" --build.bin "make run"
 
 .PHONY: image
 image:

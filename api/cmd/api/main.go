@@ -18,6 +18,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
+	storage_go "github.com/supabase-community/storage-go"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 
@@ -30,10 +31,18 @@ type Config struct {
 	DbPass string `env:"DB_PASS"`
 	DbName string `env:"DB_NAME"`
 	DbPort int    `env:"DB_PORT"`
+	SupabaseS3Endpoint string `env:"SUPABASE_S3_ENDPOINT"`
+
+	SupabaseS3Region string `env:"SUPABASE_S3_REGION"`
+	
+	SupabaseS3AccessKeyID string `env:"SUPABASE_S3_ACCESS_KEY_ID"`
+	
+	SupabaseS3SecretAccessKey string `env:"SUPABASE_S3_SECRET_ACCESS_KEY"`
 }
 
 var (
 	Port = 8080
+	AwsRegion = "us-west-2"
 )
 
 func pgConnString(config Config) string {
@@ -45,26 +54,28 @@ func pgConnString(config Config) string {
 		config.DbName)
 }
 
+
 func main() {
 	stage := flag.String("stage", "production", "-stage development|production")
 	flag.Parse()
-	var err error
+	logger := slog.Default()
 
+	var err error
 	if os.Getenv("PORT") != "" {
 		Port, err = strconv.Atoi(os.Getenv("PORT"))
 		if err != nil {
-			slog.Error("failed to parse PORT", slog.Any("error", err))
+			logger.Error("failed to parse PORT", slog.Any("error", err))
 			os.Exit(1)
 		}
 	}
 
-	slog.Info("STAGE 2", slog.String("stage", *stage))
+	logger.Info("STAGE", slog.String("stage", *stage))
 
 	if *stage == "development" {
 		// Load .env
 		err = godotenv.Load(".env")
 		if err != nil {
-			slog.Error("failed to load .env", slog.Any("error", err))
+			logger.Error("failed to load .env", slog.Any("error", err))
 		}
 	}
 
@@ -72,10 +83,9 @@ func main() {
 	var config Config
 	err = env.Parse(&config)
 	if err != nil {
-		slog.Error("failed to parse env", slog.Any("error", err))
+		logger.Error("failed to parse env", slog.Any("error", err))
 		os.Exit(1)
 	}
-	logger := slog.Default()
 	logger.Info("config: ", slog.Any("config", config))
 	connString := pgConnString(config)
 
@@ -83,30 +93,36 @@ func main() {
 	// Postgres
 	db, err := sql.Open("pgx", connString)
 	if err != nil {
-		slog.Error("failed to open postgres", slog.Any("error", err))
+		logger.Error("failed to open postgres", slog.Any("error", err))
 		os.Exit(1)
 	}
 	if err := db.Ping(); err != nil {
-		slog.Error("failed to ping postgres", slog.Any("error", err))
+		logger.Error("failed to ping postgres", slog.Any("error", err))
 		os.Exit(1)
 	}
 
 	ctx := context.Background()
-	cfg, err := awsConfig.LoadDefaultConfig(ctx)
+	
+	cfg, err := awsConfig.LoadDefaultConfig(ctx, awsConfig.WithRegion(AwsRegion))
 	if err != nil {
-		slog.Error("failed to load aws config", slog.Any("error", err))
+		logger.Error("failed to load aws config", slog.Any("error", err))
 		os.Exit(1)
 	}
 
+	logger.Info("aws config", slog.Any("region", cfg.Region))
+
+	storageClient := storage_go.NewClient(
+		config.SupabaseS3Endpoint, config.SupabaseS3SecretAccessKey, nil,
+	)
 	// Setup S3 bucket
 	s3Client := s3.NewFromConfig(cfg)
-	api := server.New(s3Client)
+	api := server.New(s3Client, storageClient)
 	mux := http.NewServeMux()
 
 	// Create server
 	path, handler := happenedv1connect.NewHappenedServiceHandler(api)
 	mux.Handle(path, handler)
-	slog.Info("happenedv1connect.HappenedServiceName", slog.String("name", happenedv1connect.HappenedServiceName))
+	logger.Info("happenedv1connect.HappenedServiceName", slog.String("name", happenedv1connect.HappenedServiceName))
 
 	reflector := grpcreflect.NewStaticReflector(
 		happenedv1connect.HappenedServiceName,
@@ -128,10 +144,10 @@ func main() {
 
 	if err != nil {
 		if errors.Is(err, http.ErrServerClosed) {
-			slog.Info("shutting down server", slog.Any("error", err))
+			logger.Info("shutting down server", slog.Any("error", err))
 			os.Exit(0)
 		} else {
-			slog.Error("unexpected error", slog.Any("error", err))
+			logger.Error("unexpected error", slog.Any("error", err))
 			os.Exit(1)
 		}
 	}

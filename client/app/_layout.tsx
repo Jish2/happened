@@ -12,11 +12,16 @@ import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";
 import { CLERK_PUBLISHABLE_KEY } from "@/env";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import "react-native-reanimated";
-
+import "fast-text-encoding";
 import "../global.css";
+import { polyfills } from "@/app/polyfill.native";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+// Needed to polyfill TextEncoder/ TextDecoder
+
+polyfills();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();

@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file protos/v1/happened_messages.proto.
  */
 export const file_protos_v1_happened_messages: GenFile = /*@__PURE__*/
-  fileDesc("CiFwcm90b3MvdjEvaGFwcGVuZWRfbWVzc2FnZXMucHJvdG8SEWhhcHBlbmVkX21lc3NhZ2VzIhwKDEdyZWV0UmVxdWVzdBIMCgRuYW1lGAEgASgJIiEKDUdyZWV0UmVzcG9uc2USEAoIZ3JlZXRpbmcYASABKAkiFgoFRXZlbnQSDQoFdGl0bGUYASABKAkiRwoSQ3JlYXRlRXZlbnRSZXF1ZXN0Eg0KBXRpdGxlGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEg0KBXBsYWNlGAMgASgJIj4KE0NyZWF0ZUV2ZW50UmVzcG9uc2USJwoFZXZlbnQYASABKAsyGC5oYXBwZW5lZF9tZXNzYWdlcy5FdmVudCIaChhHZXRVcGxvYWRJbWFnZVVSTFJlcXVlc3QiLwoZR2V0VXBsb2FkSW1hZ2VVUkxSZXNwb25zZRISCgp1cGxvYWRfdXJsGAEgASgJQiZaJGhhcHBlbmVkYXBpL2dlbi9wcm90b3MvdjE7aGFwcGVuZWR2MWIGcHJvdG8z");
+  fileDesc("CiFwcm90b3MvdjEvaGFwcGVuZWRfbWVzc2FnZXMucHJvdG8SEWhhcHBlbmVkX21lc3NhZ2VzIhwKDEdyZWV0UmVxdWVzdBIMCgRuYW1lGAEgASgJIiEKDUdyZWV0UmVzcG9uc2USEAoIZ3JlZXRpbmcYASABKAkiFgoFRXZlbnQSDQoFdGl0bGUYASABKAkiRwoSQ3JlYXRlRXZlbnRSZXF1ZXN0Eg0KBXRpdGxlGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEg0KBXBsYWNlGAMgASgJIj4KE0NyZWF0ZUV2ZW50UmVzcG9uc2USJwoFZXZlbnQYASABKAsyGC5oYXBwZW5lZF9tZXNzYWdlcy5FdmVudCItChhHZXRVcGxvYWRJbWFnZVVSTFJlcXVlc3QSEQoJaW1hZ2Vfa2V5GAEgASgJIi8KGUdldFVwbG9hZEltYWdlVVJMUmVzcG9uc2USEgoKdXBsb2FkX3VybBgBIAEoCUImWiRoYXBwZW5lZGFwaS9nZW4vcHJvdG9zL3YxO2hhcHBlbmVkdjFiBnByb3RvMw");
 
 /**
  * @generated from message happened_messages.GreetRequest
@@ -111,6 +111,10 @@ export const CreateEventResponseSchema: GenMessage<CreateEventResponse> = /*@__P
  * @generated from message happened_messages.GetUploadImageURLRequest
  */
 export type GetUploadImageURLRequest = Message<"happened_messages.GetUploadImageURLRequest"> & {
+  /**
+   * @generated from field: string image_key = 1;
+   */
+  imageKey: string;
 };
 
 /**

@@ -23,7 +23,9 @@ message CreateEventResponse {
   Event event = 1;
 }
 
-message GetUploadImageURLRequest {}
+message GetUploadImageURLRequest {
+    string image_key = 1;
+}
 message GetUploadImageURLResponse {
   string upload_url = 1;
 }

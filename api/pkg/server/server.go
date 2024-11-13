@@ -1,16 +1,18 @@
 package server
 
 import (
-	"connectrpc.com/connect"
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/google/uuid"
 	pb "happenedapi/gen/protos/v1"
 	"happenedapi/gen/protos/v1/happenedv1connect"
 	"log"
+	"log/slog"
 	"time"
+
+	"connectrpc.com/connect"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go/aws"
+	storage_go "github.com/supabase-community/storage-go"
 )
 
 // Ensure interface satisfaction
@@ -22,31 +24,42 @@ const (
 
 type HappenedServer struct {
 	s3Client *s3.Client
+	storageClient *storage_go.Client
 }
 
-func New(s3Client *s3.Client) *HappenedServer {
+func New(s3Client *s3.Client, storageClient *storage_go.Client) *HappenedServer {
 	return &HappenedServer{
 		s3Client: s3Client,
+		storageClient: storageClient,
 	}
 }
 
 func (s *HappenedServer) GetUploadImageURL(
 	ctx context.Context,
 	req *connect.Request[pb.GetUploadImageURLRequest]) (*connect.Response[pb.GetUploadImageURLResponse], error) {
-	//TODO implement me
-
-	imageKey := uuid.New().String()
+	imageKey := req.Msg.ImageKey
+	slog.Info("generating presigned", slog.String("imageKey", imageKey))
 	presignClient := s3.NewPresignClient(s.s3Client)
+
 	presignedPutRequest, err := presignClient.PresignPutObject(ctx, &s3.PutObjectInput{
 		Bucket:  aws.String(HappenedBucketName),
 		Key:     aws.String(imageKey),
+		ContentType: aws.String("image/*"),
 		Expires: aws.Time(time.Now().Add(time.Minute * 5)),
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	log.Println("presignedPutRequest", presignedPutRequest)
+	
+
+
+	// resp, err := s.storageClient.CreateSignedUploadUrl(HappenedBucketName, imageKey)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	
+	log.Println("presigned url", presignedPutRequest.URL)
 	response := connect.NewResponse(&pb.GetUploadImageURLResponse{
 		UploadUrl: presignedPutRequest.URL,
 	})

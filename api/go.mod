@@ -5,6 +5,7 @@ go 1.22.2
 require (
 	connectrpc.com/connect v1.17.0
 	connectrpc.com/grpcreflect v1.2.0
+	github.com/aws/aws-sdk-go v1.55.5
 	github.com/aws/aws-sdk-go-v2 v1.32.4
 	github.com/aws/aws-sdk-go-v2/config v1.28.3
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.66.3
@@ -12,8 +13,10 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/joho/godotenv v1.5.1
+	github.com/supabase-community/storage-go v0.7.0
 	golang.org/x/net v0.31.0
 	google.golang.org/protobuf v1.34.2
+	gorm.io/gorm v1.25.12
 )
 
 require (
@@ -44,6 +47,11 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
+	github.com/supabase-community/functions-go v0.0.0-20220927045802-22373e6cb51d // indirect
+	github.com/supabase-community/gotrue-go v1.2.0 // indirect
+	github.com/supabase-community/postgrest-go v0.0.11 // indirect
+	github.com/supabase-community/supabase-go v0.0.4 // indirect
+	github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80 // indirect
 	golang.org/x/crypto v0.29.0 // indirect
 	golang.org/x/sync v0.9.0 // indirect
 	golang.org/x/sys v0.27.0 // indirect
