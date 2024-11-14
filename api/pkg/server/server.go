@@ -1,13 +1,15 @@
 package server
 
 import (
-	"connectrpc.com/connect"
 	"context"
+	"errors"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
 	happenedv1 "happenedapi/gen/protos/v1"
 	"happenedapi/gen/protos/v1/happenedv1connect"
 	"log"
+
+	"connectrpc.com/connect"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 // Ensure interface satisfaction
@@ -39,6 +41,10 @@ func (s *HappenedServer) Greet(
 	ctx context.Context,
 	req *connect.Request[happenedv1.GreetRequest]) (*connect.Response[happenedv1.GreetResponse], error) {
 	log.Println("Request headers", req.Header())
+
+	if req.Msg.Name == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("name is required"))
+	}
 
 	res := connect.NewResponse(&happenedv1.GreetResponse{
 		Greeting: fmt.Sprintf("Hello, %s!", req.Msg.Name),
