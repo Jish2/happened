@@ -38,7 +38,7 @@ export default function HomeScreen() {
     const getData = async () => {
       try {
         const request = create(GreetRequestSchema, {
-          name: "Andy",
+          name: "",
         });
 
         const response = await client.greet(request);
@@ -46,13 +46,7 @@ export default function HomeScreen() {
         setGreeting(response.greeting);
       } catch (e) {
         if (e instanceof ConnectError) {
-          console.error(
-            "error calling greet",
-            e.name,
-            e.details,
-            e.cause,
-            e.code,
-          );
+          console.error("error calling greet", String(e));
         }
       }
     };
