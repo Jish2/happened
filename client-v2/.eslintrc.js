@@ -13,5 +13,6 @@ module.exports = {
     "prettier/prettier": "off",
     "@typescript-eslint/no-require-imports": "off",
     "@typescript-eslint/no-unused-vars": "warn",
+    "import/no-unresolved": "off",
   },
 };
