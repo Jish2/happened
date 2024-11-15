@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"errors"
@@ -43,7 +44,7 @@ func pgConnString(config Config) string {
 
 func createOpenAPIAndClientSDK() {
 	// Wait for server start
-	time.Sleep(time.Millisecond * 250)
+	time.Sleep(time.Millisecond * 100)
 
 	const MaxAttempts = 5
 	attempts := 0
@@ -65,13 +66,27 @@ func createOpenAPIAndClientSDK() {
 	}
 	slog.Info("✔ Successfully generated openapi.yaml")
 
+	// Clean before acknowledging to confirm generation from Orval.
+	cmd = exec.Command("sh", "-c", "make -C ../ clean")
+	if err := cmd.Run(); err != nil {
+		slog.Error("error cleaning gen")
+		return
+	}
+
 	slog.Info("Generating Typescript client SDK...")
 	// Generate the client SDK with Orval
 	cmd = exec.Command("sh", "-c", "make -C ../ gen")
-
-	if err := cmd.Run(); err != nil {
+	var stdout bytes.Buffer
+	cmd.Stdout = &stdout
+	err := cmd.Run()
+	fmt.Println(cmd.Stdout)
+	if err != nil {
 		slog.Error("✖ Error generating Typescript client SDK", slog.Any("error", err))
 		return
+	}
+
+	for _, err := os.Stat("../client/gen"); os.IsNotExist(err); {
+		log.Print("hello")
 	}
 	slog.Info("✔ Successfully generated client SDK")
 

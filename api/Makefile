@@ -2,6 +2,9 @@
 
 .PHONY: watch migrate
 
+clean:
+	@rm -rf ./bin
+
 deps:
 	@go install "github.com/air-verse/air@v1.61.1"
 	

@@ -2,6 +2,10 @@
 deps:
 	@npm install -g orval
 
+
+clean:
+	@rm -rf ./client/gen
+
 watch:
 	$(MAKE) -C api watch
 

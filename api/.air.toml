@@ -6,7 +6,6 @@ tmp_dir = "tmp"
   args_bin = []
   bin = "./bin/api"
   cmd = "make api"
-  delay = 1000
   exclude_regex = ["_test.go"]
   exclude_unchanged = false
   log = "build-errors.log"
