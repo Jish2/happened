@@ -5,18 +5,18 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	awsConfig "github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/caarlos0/env/v11"
-	"github.com/joho/godotenv"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
-	"happenedapi/gen/protos/v1/happenedv1connect"
 	"happenedapi/pkg/server"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/exec"
+	"time"
+
+	awsConfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/caarlos0/env/v11"
+	"github.com/joho/godotenv"
 
 	_ "github.com/jackc/pgx/v5/stdlib" // Import the pgx driver for database/sql
 )
@@ -28,6 +28,7 @@ type Config struct {
 	DbName string `env:"DB_NAME"`
 	DbPort int    `env:"DB_PORT"`
 }
+
 
 const (
 	Port = 8080
@@ -55,8 +56,9 @@ func main() {
 	if err != nil {
 		return
 	}
+
 	logger := slog.Default()
-	logger.Info("config: ", config)
+	logger.Info("config: ", slog.Any("config", config))
 	connString := pgConnString(config)
 
 	// Setup Dependencies
@@ -77,20 +79,26 @@ func main() {
 
 	// Setup S3 bucket
 	s3Client := s3.NewFromConfig(cfg)
-	api := server.New(s3Client)
-	mux := http.NewServeMux()
+	_ = s3Client
 
 	// Create server
-	path, handler := happenedv1connect.NewHappenedServiceHandler(api)
-	mux.Handle(path, handler)
+	api := server.New(db)
+	srv := http.Server{
+		Addr:    fmt.Sprintf(":%d", Port),
+		Handler: api,
+	}
 
 	logger.Info("server listening", slog.Int("port", Port))
-	err = http.ListenAndServe(
-		fmt.Sprintf("localhost:%d", Port),
-		h2c.NewHandler(mux, &http2.Server{}),
-	)
+	// Generate openapi.yaml after the server starts
+	go func() {
+		time.Sleep(time.Millisecond * 250)
+		cmd := exec.Command("sh", "-c", fmt.Sprintf("curl http://localhost:%d/openapi.yaml > openapi.yaml", Port))
 
-	if err != nil {
+		if err := cmd.Run(); err != nil {
+			logger.Error("error generating openapi spec", slog.Any("error", err))
+		}
+	}()
+	if err = srv.ListenAndServe(); err != nil {
 		if errors.Is(err, http.ErrServerClosed) {
 			slog.Info("shutting down server")
 			os.Exit(0)

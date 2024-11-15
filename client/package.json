@@ -18,13 +18,14 @@
     "preset": "jest-expo"
   },
   "dependencies": {
-    "@clerk/clerk-expo": "^2.3.0",
     "@bufbuild/protobuf": "^2.2.2",
+    "@clerk/clerk-expo": "^2.3.0",
     "@connectrpc/connect": "^2.0.0-rc.2",
     "@connectrpc/connect-web": "^2.0.0-rc.2",
     "@expo/vector-icons": "^14.0.2",
     "@react-native/metro-config": "^0.76.1",
     "@react-navigation/native": "^6.0.2",
+    "axios": "^1.7.7",
     "clsx": "^2.1.1",
     "expo": "~51.0.28",
     "expo-auth-session": "~5.5.2",
