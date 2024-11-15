@@ -41,6 +41,42 @@ func pgConnString(config Config) string {
 		config.DbName)
 }
 
+func createOpenAPIAndClientSDK() {
+	// Wait for server start
+	time.Sleep(time.Millisecond * 250)
+
+	const MaxAttempts = 5
+	attempts := 0
+	for attempts < MaxAttempts {
+		response, err := http.Get(fmt.Sprintf("http://localhost:%d/ping", Port))
+		if err == nil && response.StatusCode == http.StatusOK {
+			break
+		}
+		attempts++
+		time.Sleep(time.Millisecond * 50)
+	}
+
+	slog.Info("Generating openapi.yaml...")
+	cmd := exec.Command("sh", "-c", fmt.Sprintf("curl http://localhost:%d/openapi.yaml > openapi.yaml", Port))
+	// Generate the OpenAPI spec
+	if err := cmd.Run(); err != nil {
+		slog.Error("✖ Error generating openapi.yaml", slog.Any("error", err))
+		return
+	}
+	slog.Info("✔ Successfully generated openapi.yaml")
+
+	slog.Info("Generating Typescript client SDK...")
+	// Generate the client SDK with Orval
+	cmd = exec.Command("sh", "-c", "make -C ../ gen")
+
+	if err := cmd.Run(); err != nil {
+		slog.Error("✖ Error generating Typescript client SDK", slog.Any("error", err))
+		return
+	}
+	slog.Info("✔ Successfully generated client SDK")
+
+}
+
 func main() {
 	// Load .env
 	err := godotenv.Load(".env")
@@ -87,42 +123,10 @@ func main() {
 	}
 
 	logger.Info("server listening", slog.Int("port", Port))
+
 	// Generate openapi.yaml after the server starts
-	go func() {
-		// Wait for server start
-		time.Sleep(time.Millisecond * 250)
+	go createOpenAPIAndClientSDK()
 
-		const MaxAttempts = 5
-		attempts := 0
-		for attempts < MaxAttempts {
-			response, err := http.Get(fmt.Sprintf("http://localhost:%d/ping", Port))
-			if response.StatusCode == http.StatusOK && err == nil {
-				break
-			}
-			attempts++
-			time.Sleep(time.Millisecond * 50)
-		}
-
-		logger.Info("Generating openapi.yaml...")
-		cmd := exec.Command("sh", "-c", fmt.Sprintf("curl http://localhost:%d/openapi.yaml > openapi.yaml", Port))
-		// Generate the OpenAPI spec
-		if err := cmd.Run(); err != nil {
-			logger.Error("✖ Error generating openapi.yaml", slog.Any("error", err))
-			return
-		}
-		logger.Info("✔ Successfully generated openapi.yaml")
-
-		logger.Info("Generating Typescript client SDK...")
-		// Generate the client SDK with Orval
-		cmd = exec.Command("sh", "-c", "make -C ../ gen")
-
-		if err := cmd.Run(); err != nil {
-			logger.Error("✖ Error generating Typescript client SDK", slog.Any("error", err))
-			return
-		}
-		logger.Info("✔ Successfully generated client SDK")
-
-	}()
 	if err = srv.ListenAndServe(); err != nil {
 		if errors.Is(err, http.ErrServerClosed) {
 			slog.Info("shutting down server")
