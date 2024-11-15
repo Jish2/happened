@@ -1,36 +1,23 @@
-.PHONY: deps
+# .PHONY: deps
+# deps:
+# 	@go install "github.com/air-verse/air@v1.61.1"
+# 	@brew tap hashicorp/tap
+# 	@brew install hashicorp/tap/terraform
+
 deps:
-	@brew install bufbuild/buf/buf
-	@go install "google.golang.org/protobuf/cmd/protoc-gen-go@latest"
-	@go install "connectrpc.com/connect/cmd/protoc-gen-connect-go@latest"
-	@go install "github.com/air-verse/air@v1.61.1"
-	@brew tap hashicorp/tap
-	@brew install hashicorp/tap/terraform
+	@npm install -g orval
 
+.PHONY: openapi gen
 
-.PHONY: api
-api:
-	$(MAKE) -C api
-
-.PHONY: watch
 watch:
 	$(MAKE) -C api watch
 
-.PHONY: gen
-gen:
-	$(MAKE) -C api gen
-	@cd client; yarn gen
+# Server must be running to generate the latest spec.
+openapi:
+	$(MAKE) -C api openapi
 
-.PHONY: init-tf
-init-tf:
-	@terraform -chdir=./terraform init
-
-.PHONY: tf
-tf:
-	@terraform -chdir=./terraform apply
-
-.PHONY: destroy
-destroy:
-	@terraform -chdir=./terraform destroy
+# Generates the client SDK from the server's current OpenAPI spec.
+gen: openapi
+	@orval --input ./api/openapi.yaml --output ./client/gen/openapi.ts
 
 
