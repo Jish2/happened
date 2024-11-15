@@ -92,11 +92,15 @@ func main() {
 		// Wait for server start
 		time.Sleep(time.Millisecond * 250)
 
-		for {
+		const MaxAttempts = 5
+		attempts := 0
+		for attempts < MaxAttempts {
 			response, err := http.Get(fmt.Sprintf("http://localhost:%d/ping", Port))
 			if response.StatusCode == http.StatusOK && err == nil {
 				break
 			}
+			attempts++
+			time.Sleep(time.Millisecond * 50)
 		}
 
 		logger.Info("Generating openapi.yaml...")
@@ -106,7 +110,7 @@ func main() {
 			logger.Error("✖ Error generating openapi.yaml", slog.Any("error", err))
 			return
 		}
-		logger.Info("✔ Successfully generated openapi.yaml ")
+		logger.Info("✔ Successfully generated openapi.yaml")
 
 		logger.Info("Generating Typescript client SDK...")
 		// Generate the client SDK with Orval
