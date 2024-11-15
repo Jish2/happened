@@ -10,6 +10,7 @@ require (
 	github.com/danielgtaylor/huma/v2 v2.26.0
 	github.com/go-chi/chi v1.5.5
 	github.com/go-chi/chi/v5 v5.1.0
+	github.com/go-chi/cors v1.2.1
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/joho/godotenv v1.5.1
 	golang.org/x/net v0.31.0

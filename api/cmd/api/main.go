@@ -29,6 +29,7 @@ type Config struct {
 	DbPort int    `env:"DB_PORT"`
 }
 
+
 const (
 	Port = 8080
 )
@@ -56,7 +57,6 @@ func main() {
 		return
 	}
 
-
 	logger := slog.Default()
 	logger.Info("config: ", slog.Any("config", config))
 	connString := pgConnString(config)
@@ -82,13 +82,11 @@ func main() {
 	_ = s3Client
 
 	// Create server
-	api := server.NewHTTPServer(db)
+	api := server.New(db)
 	srv := http.Server{
-		Addr:                         fmt.Sprintf(":%d", Port),
-		Handler:                      api,
+		Addr:    fmt.Sprintf(":%d", Port),
+		Handler: api,
 	}
-
-	
 
 	logger.Info("server listening", slog.Int("port", Port))
 	// Generate openapi.yaml after the server starts
