@@ -1,10 +1,11 @@
 
 
-
-
-
 .PHONY: watch migrate
 
+
+deps:
+	@go install "github.com/air-verse/air@v1.61.1"
+	
 fmt:
 	@go fmt ./...
 
@@ -28,7 +29,7 @@ migrate:
 connect:
 	@psql "postgres://admin:admin@localhost:5433/happened_db"
 
-#
+# Startup the development database
 db:
 	@docker compose up -d
 

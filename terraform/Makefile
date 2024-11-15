@@ -1,14 +1,16 @@
 
+.PHONY: init-tf tf destroy
 
-.PHONY: init-tf
+deps:
+	@brew tap hashicorp/tap
+	@brew install hashicorp/tap/terraform
+
 init-tf:
 	@terraform init
 
-.PHONY: tf
 tf:
 	@terraform apply
 
-.PHONY: destroy
 destroy:
 	@terraform destroy
 
