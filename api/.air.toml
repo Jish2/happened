@@ -10,7 +10,6 @@ tmp_dir = "tmp"
   exclude_regex = ["_test.go"]
   exclude_unchanged = false
   log = "build-errors.log"
-  post_cmd = ["sleep 0.25 && make openapi"]
 
 [color]
   app = ""

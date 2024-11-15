@@ -4,10 +4,11 @@
  * My API
  * OpenAPI spec version: 1.0.0
  */
-import axios from "axios";
-
-import type { AxiosRequestConfig, AxiosResponse } from "axios";
-
+import axios from 'axios'
+import type {
+  AxiosRequestConfig,
+  AxiosResponse
+} from 'axios'
 export interface GreetingOutputBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
@@ -46,14 +47,19 @@ export interface ErrorModel {
   type?: string;
 }
 
-/**
+
+
+
+
+  /**
  * @summary Get greeting by name
  */
 export const getGreetingByName = <TData = AxiosResponse<GreetingOutputBody>>(
-  name: string,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.get(`/greeting/${name}`, options);
-};
+    name: string, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/greeting/${name}`,options
+    );
+  }
 
-export type GetGreetingByNameResult = AxiosResponse<GreetingOutputBody>;
+export type GetGreetingByNameResult = AxiosResponse<GreetingOutputBody>

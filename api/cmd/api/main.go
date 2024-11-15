@@ -16,9 +16,8 @@ import (
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/caarlos0/env/v11"
-	"github.com/joho/godotenv"
-
 	_ "github.com/jackc/pgx/v5/stdlib" // Import the pgx driver for database/sql
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -28,7 +27,6 @@ type Config struct {
 	DbName string `env:"DB_NAME"`
 	DbPort int    `env:"DB_PORT"`
 }
-
 
 const (
 	Port = 8080
@@ -91,12 +89,35 @@ func main() {
 	logger.Info("server listening", slog.Int("port", Port))
 	// Generate openapi.yaml after the server starts
 	go func() {
+		// Wait for server start
 		time.Sleep(time.Millisecond * 250)
+
+		for {
+			response, err := http.Get(fmt.Sprintf("http://localhost:%d/ping", Port))
+			if response.StatusCode == http.StatusOK && err == nil {
+				break
+			}
+		}
+
+		logger.Info("Generating openapi.yaml...")
 		cmd := exec.Command("sh", "-c", fmt.Sprintf("curl http://localhost:%d/openapi.yaml > openapi.yaml", Port))
+		// Generate the OpenAPI spec
+		if err := cmd.Run(); err != nil {
+			logger.Error("✖ Error generating openapi.yaml", slog.Any("error", err))
+			return
+		}
+		logger.Info("✔ Successfully generated openapi.yaml ")
+
+		logger.Info("Generating Typescript client SDK...")
+		// Generate the client SDK with Orval
+		cmd = exec.Command("sh", "-c", "make -C ../ gen")
 
 		if err := cmd.Run(); err != nil {
-			logger.Error("error generating openapi spec", slog.Any("error", err))
+			logger.Error("✖ Error generating Typescript client SDK", slog.Any("error", err))
+			return
 		}
+		logger.Info("✔ Successfully generated client SDK")
+
 	}()
 	if err = srv.ListenAndServe(); err != nil {
 		if errors.Is(err, http.ErrServerClosed) {

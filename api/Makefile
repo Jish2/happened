@@ -18,8 +18,8 @@ api:
 gen:
 	@buf generate
 
-watch:
-	@air --build.cmd "make api" --build.bin "./bin/api"
+watch: db
+	@air
 
 # Applies the specified schema file to the database, similar to Terraform.
 migrate:
