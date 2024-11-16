@@ -37,17 +37,16 @@ const (
 type Options struct {
 	Debug bool   `doc:"Enable debug logging"`
 	Host  string `doc:"Hostname to listen on."`
-	Port  int    `doc:"Port to listen on." short:"p" default:"8888"`
+	Port  int    `doc:"Port to listen on." short:"p" default:"8080"`
+	Stage string `doc:"environment" short:"s" default:"development"`
 }
 
-func pgConnString(config Config) string {
-	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s",
-		config.DbHost,
-		config.DbPort,
-		config.DbUser,
-		config.DbPass,
-		config.DbName)
-}
+type Stage = string
+
+const (
+	Development Stage = "development"
+	Production        = "production"
+)
 
 var api huma.API
 
@@ -58,20 +57,31 @@ func main() {
 		api = server.New(nil)
 		var srv http.Server
 
-		hooks.OnStart(func() {
-			// Generate openapi.yaml after the server starts
+		stage := Development
+		if opts.Stage == Production {
+			slog.Info("launching server in production mode")
+			stage = Production
+		} else {
+			slog.Info("defaulting to server development mode")
+		}
 
-			// Load .env
-			err := godotenv.Load(".env")
-			if err != nil {
-				return
+		hooks.OnStart(func() {
+			var err error
+			if stage == Development {
+				// Load .env
+				err := godotenv.Load(".env")
+				if err != nil {
+					slog.Error("loading env", slog.Any("error", err))
+					os.Exit(1)
+				}
 			}
 
 			// Parse env into config
 			var config Config
 			err = env.Parse(&config)
 			if err != nil {
-				return
+				slog.Error("parsing env to config", slog.Any("error", err))
+				os.Exit(1)
 			}
 
 			logger := slog.Default()
@@ -82,15 +92,18 @@ func main() {
 			// Postgres
 			db, err := sql.Open("pgx", connString)
 			if err != nil {
-				panic(err)
+				slog.Error("opening database", slog.Any("error", err))
+				os.Exit(1)
 			}
 			if err := db.Ping(); err != nil {
-				panic(err)
+				slog.Error("pinging db", slog.Any("error", err))
+				os.Exit(1)
 			}
 
 			cfg, err := awsConfig.LoadDefaultConfig(ctx)
 			if err != nil {
-				log.Fatalln(err)
+				slog.Error("loading default aws config", slog.Any("error", err))
+				os.Exit(1)
 			}
 
 			// Setup S3 bucket
@@ -103,6 +116,7 @@ func main() {
 				Addr:    fmt.Sprintf(":%d", Port),
 				Handler: api.Adapter(),
 			}
+
 			logger.Info("server listening", slog.Int("port", Port))
 			if err = srv.ListenAndServe(); err != nil {
 				if errors.Is(err, http.ErrServerClosed) {
@@ -113,7 +127,6 @@ func main() {
 					os.Exit(1)
 				}
 			}
-
 		})
 
 		hooks.OnStop(func() {
@@ -140,4 +153,13 @@ func main() {
 	})
 
 	cli.Run()
+}
+
+func pgConnString(config Config) string {
+	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s",
+		config.DbHost,
+		config.DbPort,
+		config.DbUser,
+		config.DbPass,
+		config.DbName)
 }
