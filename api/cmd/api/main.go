@@ -6,6 +6,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/humacli"
+	"github.com/spf13/cobra"
 	"happenedapi/pkg/server"
 	"log"
 	"log/slog"
@@ -33,6 +36,12 @@ const (
 	Port = 8080
 )
 
+type Options struct {
+	Debug bool   `doc:"Enable debug logging"`
+	Host  string `doc:"Hostname to listen on."`
+	Port  int    `doc:"Port to listen on." short:"p" default:"8888"`
+}
+
 func pgConnString(config Config) string {
 	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s",
 		config.DbHost,
@@ -41,6 +50,8 @@ func pgConnString(config Config) string {
 		config.DbPass,
 		config.DbName)
 }
+
+var api huma.API
 
 func createOpenAPIAndClientSDK() {
 	// Wait for server start
@@ -93,62 +104,77 @@ func createOpenAPIAndClientSDK() {
 }
 
 func main() {
-	// Load .env
-	err := godotenv.Load(".env")
-	if err != nil {
-		return
-	}
-
-	// Parse env into config
-	var config Config
-	err = env.Parse(&config)
-	if err != nil {
-		return
-	}
-
-	logger := slog.Default()
-	logger.Info("config: ", slog.Any("config", config))
-	connString := pgConnString(config)
-
-	// Setup Dependencies
-	// Postgres
-	db, err := sql.Open("pgx", connString)
-	if err != nil {
-		panic(err)
-	}
-	if err := db.Ping(); err != nil {
-		panic(err)
-	}
-
-	ctx := context.Background()
-	cfg, err := awsConfig.LoadDefaultConfig(ctx)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	// Setup S3 bucket
-	s3Client := s3.NewFromConfig(cfg)
-	_ = s3Client
-
-	// Create server
-	api := server.New(db)
-	srv := http.Server{
-		Addr:    fmt.Sprintf(":%d", Port),
-		Handler: api,
-	}
-
-	logger.Info("server listening", slog.Int("port", Port))
-
-	// Generate openapi.yaml after the server starts
-	go createOpenAPIAndClientSDK()
-
-	if err = srv.ListenAndServe(); err != nil {
-		if errors.Is(err, http.ErrServerClosed) {
-			slog.Info("shutting down server")
-			os.Exit(0)
-		} else {
-			slog.Error("unexpected error", slog.Any("error", err))
-			os.Exit(1)
+	cli := humacli.New(func(hooks humacli.Hooks, opts *Options) {
+		// Load .env
+		err := godotenv.Load(".env")
+		if err != nil {
+			return
 		}
-	}
+
+		// Parse env into config
+		var config Config
+		err = env.Parse(&config)
+		if err != nil {
+			return
+		}
+
+		logger := slog.Default()
+		logger.Info("config: ", slog.Any("config", config))
+		connString := pgConnString(config)
+
+		// Setup Dependencies
+		// Postgres
+		db, err := sql.Open("pgx", connString)
+		if err != nil {
+			panic(err)
+		}
+		if err := db.Ping(); err != nil {
+			panic(err)
+		}
+
+		ctx := context.Background()
+		cfg, err := awsConfig.LoadDefaultConfig(ctx)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		// Setup S3 bucket
+		s3Client := s3.NewFromConfig(cfg)
+		_ = s3Client
+
+		// Create server
+		api = server.New(db)
+		srv := http.Server{
+			Addr:    fmt.Sprintf(":%d", Port),
+			Handler: api.Adapter(),
+		}
+
+		logger.Info("server listening", slog.Int("port", Port))
+
+		// Generate openapi.yaml after the server starts
+		// go createOpenAPIAndClientSDK()
+		hooks.OnStart(func() {
+			if err = srv.ListenAndServe(); err != nil {
+				if errors.Is(err, http.ErrServerClosed) {
+					slog.Info("shutting down server")
+					os.Exit(0)
+				} else {
+					slog.Error("unexpected error", slog.Any("error", err))
+					os.Exit(1)
+				}
+			}
+		})
+	})
+	cli.Root().AddCommand(&cobra.Command{
+		Use:   "openapi",
+		Short: "Print the OpenAPI spec",
+		Run: func(cmd *cobra.Command, args []string) {
+			b, err := api.OpenAPI().YAML()
+			if err != nil {
+				panic(err)
+			}
+
+			fmt.Println(string(b))
+		},
+	})
 }
