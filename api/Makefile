@@ -1,4 +1,5 @@
 
+default: api
 
 .PHONY: watch migrate
 
