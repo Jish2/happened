@@ -111,3 +111,4 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Get greeting by name
+

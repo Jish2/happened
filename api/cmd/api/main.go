@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
 	"errors"
@@ -18,7 +17,6 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"os/exec"
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib" // Import the pgx driver for database/sql
@@ -53,64 +51,16 @@ func pgConnString(config Config) string {
 
 var api huma.API
 
-func createOpenAPIAndClientSDK() {
-	// Wait for server start
-	time.Sleep(time.Millisecond * 100)
-
-	const MaxAttempts = 5
-	attempts := 0
-	for attempts < MaxAttempts {
-		response, err := http.Get(fmt.Sprintf("http://localhost:%d/ping", Port))
-		if err == nil && response.StatusCode == http.StatusOK {
-			break
-		}
-		attempts++
-		time.Sleep(time.Millisecond * 50)
-	}
-
-	slog.Info("Generating openapi.yaml...")
-	cmd := exec.Command("sh", "-c", fmt.Sprintf("curl http://localhost:%d/openapi.yaml > openapi.yaml", Port))
-	// Generate the OpenAPI spec
-	if err := cmd.Run(); err != nil {
-		slog.Error("✖ Error generating openapi.yaml", slog.Any("error", err))
-		return
-	}
-	slog.Info("✔ Successfully generated openapi.yaml")
-
-	// Clean before acknowledging to confirm generation from Orval.
-	cmd = exec.Command("sh", "-c", "make -C ../ clean")
-	if err := cmd.Run(); err != nil {
-		slog.Error("error cleaning gen")
-		return
-	}
-
-	slog.Info("Generating Typescript client SDK...")
-	// Generate the client SDK with Orval
-	cmd = exec.Command("sh", "-c", "make -C ../ gen")
-	var stdout bytes.Buffer
-	cmd.Stdout = &stdout
-	err := cmd.Run()
-	fmt.Println(cmd.Stdout)
-	if err != nil {
-		slog.Error("✖ Error generating Typescript client SDK", slog.Any("error", err))
-		return
-	}
-
-	for _, err := os.Stat("../client/gen"); os.IsNotExist(err); {
-		log.Print("hello")
-	}
-	slog.Info("✔ Successfully generated client SDK")
-
-}
-
 func main() {
 	cli := humacli.New(func(hooks humacli.Hooks, opts *Options) {
-		// Generate openapi.yaml after the server starts
-		// go createOpenAPIAndClientSDK()
-
-		slog.Info("options", slog.Any("opts", opts))
+		// Empty server for generating openapi.yaml
+		ctx := context.Background()
+		api = server.New(nil)
+		var srv http.Server
 
 		hooks.OnStart(func() {
+			// Generate openapi.yaml after the server starts
+
 			// Load .env
 			err := godotenv.Load(".env")
 			if err != nil {
@@ -138,7 +88,6 @@ func main() {
 				panic(err)
 			}
 
-			ctx := context.Background()
 			cfg, err := awsConfig.LoadDefaultConfig(ctx)
 			if err != nil {
 				log.Fatalln(err)
@@ -150,14 +99,11 @@ func main() {
 
 			// Create server
 			api = server.New(db)
-			srv := http.Server{
+			srv = http.Server{
 				Addr:    fmt.Sprintf(":%d", Port),
 				Handler: api.Adapter(),
 			}
-
 			logger.Info("server listening", slog.Int("port", Port))
-
-			slog.Info("hello")
 			if err = srv.ListenAndServe(); err != nil {
 				if errors.Is(err, http.ErrServerClosed) {
 					slog.Info("shutting down server")
@@ -169,6 +115,16 @@ func main() {
 			}
 
 		})
+
+		hooks.OnStop(func() {
+			// Gracefully shutdown your server here
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			err := srv.Shutdown(ctx)
+			if err != nil {
+				log.Fatalln(err)
+			}
+		})
 	})
 
 	cli.Root().AddCommand(&cobra.Command{
@@ -177,11 +133,11 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			b, err := api.OpenAPI().YAML()
 			if err != nil {
-				panic(err)
+				log.Fatalln(err)
 			}
-
 			fmt.Println(string(b))
 		},
 	})
+
 	cli.Run()
 }

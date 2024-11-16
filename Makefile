@@ -1,4 +1,7 @@
 
+default:
+	$(MAKE) -C api
+
 deps:
 	@npm install -g orval
 
