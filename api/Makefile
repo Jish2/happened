@@ -20,7 +20,6 @@ test:
 
 api:
 	@go build -o ./bin/api ./cmd/api
-	@make openapi
 
 watch: db
 	@air
