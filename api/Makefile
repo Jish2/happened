@@ -3,6 +3,9 @@ default: api
 
 .PHONY: watch migrate
 
+openapi:
+	@./bin/api openapi
+
 clean:
 	@rm -rf ./bin
 
