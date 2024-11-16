@@ -21,6 +21,12 @@ test:
 api:
 	@go build -o ./bin/api ./cmd/api
 
+image:
+	docker build -t anmho/happened .
+
+push:
+	docker push anmho/happened
+
 watch: db
 	@air
 
