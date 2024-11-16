@@ -4,7 +4,7 @@ default: api
 .PHONY: watch migrate
 
 openapi:
-	@./bin/api openapi
+	@./bin/api openapi > openapi.yaml
 
 clean:
 	@rm -rf ./bin
@@ -20,6 +20,7 @@ test:
 
 api:
 	@go build -o ./bin/api ./cmd/api
+	@make openapi
 
 watch: db
 	@air
