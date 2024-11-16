@@ -1,7 +1,13 @@
 
+default: api
 
 .PHONY: watch migrate
 
+openapi:
+	@./bin/api openapi > openapi.yaml
+
+clean:
+	@rm -rf ./bin
 
 deps:
 	@go install "github.com/air-verse/air@v1.61.1"
@@ -15,11 +21,13 @@ test:
 api:
 	@go build -o ./bin/api ./cmd/api
 
-gen:
-	@buf generate
+watch: db
+	@air
 
-watch:
-	@air --build.cmd "make api" --build.bin "./bin/api"
+# Database commands
+# Startup the development database
+db:
+	@docker compose up -d
 
 # Applies the specified schema file to the database, similar to Terraform.
 migrate:
@@ -28,10 +36,6 @@ migrate:
 # Connects to the local Postgres database
 connect:
 	@psql "postgres://admin:admin@localhost:5433/happened_db"
-
-# Startup the development database
-db:
-	@docker compose up -d
 
 # Introspects database and returns current schema
 inspect:

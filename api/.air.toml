@@ -5,12 +5,11 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "./bin/api"
-  cmd = "make api"
-  delay = 1000
-  exclude_regex = ["_test.go"]
+  cmd = "make -C ../"
+  exclude_file = ["openapi.yaml"]
+  exclude_regex = ["_test.go", "openapi.yaml"]
   exclude_unchanged = false
   log = "build-errors.log"
-  post_cmd = ["sleep 0.25 && make openapi"]
 
 [color]
   app = ""
