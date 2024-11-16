@@ -13,7 +13,7 @@ openapi:
 	$(MAKE) -C api openapi
 
 # Generates the client SDK from the server's current OpenAPI spec.
-gen: openapi
-	@orval --input ./api/openapi.yaml --output ./client/gen/openapi.ts
+gen:
+	@orval --input ./api/openapi.yaml --output ./client-v2/gen/openapi.ts
 
 
