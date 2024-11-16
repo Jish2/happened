@@ -1,8 +1,5 @@
 
 default:
-#	@($(MAKE) -C api openapi && $(MAKE) gen) &
-#	@($(MAKE) -C api) &
-
 	@echo "Starting API and Client SDK builds..."
 	@(make -C api) & pid1=$$!; \
 	 (make gen) & pid2=$$!; \

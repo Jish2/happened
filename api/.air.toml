@@ -4,8 +4,8 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "./start.sh"
-  cmd = "make api"
+  bin = "./bin/api"
+  cmd = "make -C ../"
   exclude_file = ["openapi.yaml"]
   exclude_regex = ["_test.go", "openapi.yaml"]
   exclude_unchanged = false
