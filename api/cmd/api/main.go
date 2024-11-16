@@ -53,7 +53,7 @@ var api huma.API
 
 func main() {
 	cli := humacli.New(func(hooks humacli.Hooks, opts *Options) {
-		// Empty server for generating openapi.yaml
+		// Create empty server for generating openapi.yaml
 		ctx := context.Background()
 		api = server.New(nil)
 		var srv http.Server
