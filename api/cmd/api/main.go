@@ -41,6 +41,13 @@ type Options struct {
 	Stage string `doc:"environment" short:"s" default:"development"`
 }
 
+type Stage = string
+
+const (
+	Development Stage = "development"
+	Production        = "production"
+)
+
 var api huma.API
 
 func main() {
@@ -50,9 +57,17 @@ func main() {
 		api = server.New(nil)
 		var srv http.Server
 
+		stage := Development
+		if opts.Stage == Production {
+			slog.Info("launching server in production mode")
+			stage = Production
+		} else {
+			slog.Info("defaulting to server development mode")
+		}
+
 		hooks.OnStart(func() {
 			var err error
-			if opts.Stage == "development" {
+			if stage == Development {
 				// Load .env
 				err := godotenv.Load(".env")
 				if err != nil {
