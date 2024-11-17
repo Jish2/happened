@@ -31,7 +31,7 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Text>Name: {name || "no name"}</Text>
+      <Text className={"bg-red-500"}>Name: {name || "no name"}</Text>
       <Text>Edit app/index.tsx to edit this screen.</Text>
     </View>
   );
