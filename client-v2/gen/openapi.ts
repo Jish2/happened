@@ -89,6 +89,18 @@ export interface CreateUploadURLBody {
 
 
 
+export interface CreateUploadURLRequestBody {
+  /** A URL to the JSON Schema for this object. */
+  readonly $schema?: string;
+  image_key: string;
+}
+
+export interface CreateUploadURLBody {
+  /** A URL to the JSON Schema for this object. */
+  readonly $schema?: string;
+  method: string;
+  upload_url: string;
+}
 
 
   /**
@@ -102,6 +114,18 @@ export const getCreateUploadUrl = <TData = AxiosResponse<CreateUploadURLBody>>(
     );
   }
 
+
+
+  /**
+ * @summary Get create upload URL
+ */
+export const getCreateUploadUrl = <TData = AxiosResponse<CreateUploadURLBody>>(
+    createUploadURLRequestBody: NonReadonly<CreateUploadURLRequestBody>, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/create-upload-url`,options
+    );
+  }
 /**
  * Protected version of greet
  * @summary Get a protected greeting
@@ -117,6 +141,8 @@ export const protectedGreet = <TData = AxiosResponse<GreetingOutputBody>>(
 /**
  * Get a greeting for a person by name.
  * @summary Get a greeting
+/**
+ * @summary Get greeting by name
  */
 export const getGreeting = <TData = AxiosResponse<GreetingOutputBody>>(
     name: string, options?: AxiosRequestConfig
@@ -129,3 +155,5 @@ export const getGreeting = <TData = AxiosResponse<GreetingOutputBody>>(
 export type GetCreateUploadUrlResult = AxiosResponse<CreateUploadURLBody>
 export type ProtectedGreetResult = AxiosResponse<GreetingOutputBody>
 export type GetGreetingResult = AxiosResponse<GreetingOutputBody>
+export type GetCreateUploadUrlResult = AxiosResponse<CreateUploadURLBody>
+export type GetGreetingByNameResult = AxiosResponse<GreetingOutputBody>
