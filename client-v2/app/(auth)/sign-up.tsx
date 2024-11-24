@@ -5,7 +5,6 @@ import { Link, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native";
 import { SignInWithOAuth } from "@/components/sign-in-with-o-auth";
-// import SignInWithOAuth from "@/components/SignInWithOAuth";
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();

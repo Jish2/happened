@@ -20,7 +20,7 @@ export default function Page() {
         const res = await getGreetingByName("name");
         setName(res.data.message);
       } catch (e) {
-        if (e instanceof AxiosError) console.log(e.message);
+        if (e instanceof AxiosError) console.error(e.message);
       }
     };
 
