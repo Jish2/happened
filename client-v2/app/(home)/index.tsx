@@ -31,7 +31,8 @@ export default function Page() {
     <View className="justify-center items-center flex-1">
       <Text>Name: {name || "no name"}</Text>
       <SignedIn>
-        <Text>Hello {user?.phoneNumbers[0].phoneNumber}</Text>
+        <Text>Hello {user?.phoneNumbers[0]?.phoneNumber}</Text>
+        <Text>{JSON.stringify(user, null, 2)}</Text>
         <TouchableOpacity
           onPress={() => {
             signOut();
