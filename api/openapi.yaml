@@ -12,11 +12,16 @@ components:
           type: string
         method:
           type: string
+        signed_headers:
+          additionalProperties:
+            type: string
+          type: object
         upload_url:
           type: string
       required:
         - method
         - upload_url
+        - signed_headers
       type: object
     CreateUploadURLRequestBody:
       additionalProperties: false

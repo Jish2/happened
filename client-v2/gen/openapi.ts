@@ -80,10 +80,13 @@ export interface CreateUploadURLRequestBody {
   image_key: string;
 }
 
+export type CreateUploadURLBodySignedHeaders = {[key: string]: string};
+
 export interface CreateUploadURLBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
   method: string;
+  signed_headers: CreateUploadURLBodySignedHeaders;
   upload_url: string;
 }
 
