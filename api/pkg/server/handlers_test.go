@@ -1,19 +1,14 @@
-package server
+package server_test
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
-	"happenedapi/pkg/images"
+	"happenedapi/pkg/server"
+	test "happenedapi/pkg/tests"
 	"net/http"
 	"testing"
 
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/danielgtaylor/huma/v2/humatest"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func Test_CreateUploadURLHandler(t *testing.T) {
@@ -21,9 +16,9 @@ func Test_CreateUploadURLHandler(t *testing.T) {
 
 	tests := []struct {
 		desc string
-		// params is the input sent when creating a presigned upload url
+		// params is the input sent when creating a pre-signed upload url
 		params map[string]any
-		// uploadFilePath is the path of the file to upload to the presigned URL
+		// uploadFilePath is the path of the file to upload to the pre-signed URL
 		uploadFilePath string
 
 		expectedStatusCode int
@@ -48,23 +43,13 @@ func Test_CreateUploadURLHandler(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.desc, func(t *testing.T) {
-			ctx := context.Background()
-			_, api := humatest.New(t)
-			cfg, err := config.LoadDefaultConfig(ctx)
-			require.NoError(t, err)
-			s3Client := s3.NewFromConfig(cfg)
-			imageService := images.NewService(s3Client)
-
-			RegisterAPI(api, nil, imageService)
+			api := test.MakeTestServer(t)
 
 			resp := api.Get("/create-upload-url", tc.params)
 			assert.Equal(t, tc.expectedStatusCode, resp.Code)
 
 			if !tc.expectedErr {
-				var body CreateUploadURLBody
-				err = json.NewDecoder(resp.Body).Decode(&body)
-				assert.NoError(t, err)
-
+				body := test.DecodeAs[server.CreateUploadURLBody](resp.Body, t)
 				assert.Equal(t, tc.expectedMethod, body.Method)
 				assert.NotEmpty(t, body.UploadURL)
 			}
