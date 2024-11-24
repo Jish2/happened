@@ -1,16 +1,19 @@
-import { TextInput, Button, View } from "react-native";
+import * as React from "react";
+import { TextInput, View, Pressable, Text } from "react-native";
 import { useSignUp } from "@clerk/clerk-expo";
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import { Link, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { TouchableOpacity } from "react-native";
+import { SignInWithOAuth } from "@/components/sign-in-with-o-auth";
+// import SignInWithOAuth from "@/components/SignInWithOAuth";
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
   const router = useRouter();
 
-  const [emailAddress, setEmailAddress] = useState("");
-  const [password, setPassword] = useState("");
-  const [pendingVerification, setPendingVerification] = useState(false);
-  const [code, setCode] = useState("");
+  const [phoneNumber, setPhoneNumber] = React.useState("");
+  const [pendingVerification, setPendingVerification] = React.useState(false);
+  const [code, setCode] = React.useState("");
 
   const onSignUpPress = async () => {
     if (!isLoaded) {
@@ -18,12 +21,9 @@ export default function SignUpScreen() {
     }
 
     try {
-      await signUp.create({
-        emailAddress,
-        password,
-      });
+      await signUp.create({ phoneNumber });
 
-      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      await signUp.preparePhoneNumberVerification({ strategy: "phone_code" });
 
       setPendingVerification(true);
     } catch (err: unknown) {
@@ -39,13 +39,13 @@ export default function SignUpScreen() {
     }
 
     try {
-      const completeSignUp = await signUp.attemptEmailAddressVerification({
+      const completeSignUp = await signUp.attemptPhoneNumberVerification({
         code,
       });
 
       if (completeSignUp.status === "complete") {
         await setActive({ session: completeSignUp.createdSessionId });
-        router.replace("/");
+        router.replace("/(home)");
       } else {
         console.error(JSON.stringify(completeSignUp, null, 2));
       }
@@ -57,32 +57,59 @@ export default function SignUpScreen() {
   };
 
   return (
-    <View>
-      {!pendingVerification && (
-        <>
+    <View className="h-full justify-center pb-16">
+      <View className="absolute left-4 top-8">
+        <Pressable>
+          <Link href="/(home)">
+            <Ionicons name="chevron-back" size={32} color="black" />
+          </Link>
+        </Pressable>
+      </View>
+      <View className="p-6">
+        <Text className="text-7xl">create an account.</Text>
+      </View>
+
+      {pendingVerification ? (
+        <View className="p-6 pb-0 gap-2">
           <TextInput
             autoCapitalize="none"
-            value={emailAddress}
-            placeholder="Email..."
-            onChangeText={(email) => setEmailAddress(email)}
-          />
-          <TextInput
-            value={password}
-            placeholder="Password..."
-            secureTextEntry={true}
-            onChangeText={(password) => setPassword(password)}
-          />
-          <Button title="Sign Up" onPress={onSignUpPress} />
-        </>
-      )}
-      {pendingVerification && (
-        <>
-          <TextInput
             value={code}
-            placeholder="Code..."
-            onChangeText={(code) => setCode(code)}
+            keyboardType="phone-pad"
+            placeholder="verification code"
+            onChangeText={(text) => setCode(text)}
+            className="bg-neutral-100 dark:bg-neutral-900 border-2 border-black/20 dark:border-white/20 rounded-lg h-12 px-4 text-neutral-950 dark:text-neutral-50"
           />
-          <Button title="Verify Email" onPress={onPressVerify} />
+
+          <TouchableOpacity
+            onPress={onPressVerify}
+            className="px-3 h-12 flex-row gap-2 items-center justify-center rounded-lg border-2 bg-black"
+          >
+            <View className="flex flex-row items-center gap-2">
+              <Text className="text-white">Verify</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <>
+          <View className="p-6 pb-0 gap-2">
+            <TextInput
+              autoCapitalize="none"
+              value={phoneNumber}
+              keyboardType="phone-pad"
+              placeholder="Phone Number"
+              onChangeText={(text) => setPhoneNumber(text)}
+              className="bg-neutral-100 dark:bg-neutral-900 border-2 border-black/20 dark:border-white/20 rounded-lg h-12 px-4 text-neutral-950 dark:text-neutral-50"
+            />
+            <TouchableOpacity
+              onPress={onSignUpPress}
+              className="px-3 h-12 flex-row gap-2 items-center justify-center rounded-lg border-2 bg-black"
+            >
+              <View className="flex flex-row items-center gap-2">
+                <Text className="text-white">Continue</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+          <SignInWithOAuth />
         </>
       )}
     </View>
