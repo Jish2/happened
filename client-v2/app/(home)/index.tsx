@@ -1,5 +1,6 @@
 import { getGreetingByName } from "@/gen/openapi";
-import { AxiosError } from "axios";
+import { SignedIn, SignedOut, useClerk, useUser } from "@clerk/clerk-expo";
+import axios, { AxiosError } from "axios";
 import { Link } from "expo-router";
 import { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -9,6 +10,7 @@ axios.defaults.baseURL =
 
 export default function Page() {
   const { user } = useUser();
+  const { signOut } = useClerk();
 
   const [name, setName] = useState<string>("");
 
@@ -29,7 +31,14 @@ export default function Page() {
     <View className="justify-center items-center flex-1">
       <Text>Name: {name || "no name"}</Text>
       <SignedIn>
-        <Text>Hello {user?.emailAddresses[0].emailAddress}</Text>
+        <Text>Hello {user?.phoneNumbers[0].phoneNumber}</Text>
+        <TouchableOpacity
+          onPress={() => {
+            signOut();
+          }}
+        >
+          <Text>Sign Out</Text>
+        </TouchableOpacity>
       </SignedIn>
       <SignedOut>
         <Link href="/(auth)/sign-in">
