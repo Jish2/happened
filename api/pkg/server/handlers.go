@@ -43,8 +43,9 @@ type CreateUploadURLRequest struct {
 }
 
 type CreateUploadURLBody struct {
-	Method    string `json:"method"`
-	UploadURL string `json:"upload_url"`
+	Method        string            `json:"method"`
+	UploadURL     string            `json:"upload_url"`
+	SignedHeaders map[string]string `json:"signed_headers"`
 }
 
 type CreateUploadURLResponse struct {
@@ -60,8 +61,9 @@ func CreateUploadURLHandler(imageService *images.Service) HumaHandler[CreateUplo
 		}
 		resp := &CreateUploadURLResponse{
 			Body: CreateUploadURLBody{
-				UploadURL: result.URL,
-				Method:    result.Method,
+				UploadURL:     result.URL,
+				Method:        result.Method,
+				SignedHeaders: result.SignedHeader,
 			},
 		}
 		return resp, nil

@@ -3,7 +3,6 @@ package images
 import (
 	"context"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -25,9 +24,9 @@ func NewService(s3Client *s3.Client) *Service {
 }
 
 type UploadURLResult struct {
-	Method        string
-	URL           string
-	SignedHeaders http.Header
+	Method       string
+	URL          string
+	SignedHeader map[string]string
 }
 
 func (s *Service) CreateUploadURL(
@@ -45,11 +44,20 @@ func (s *Service) CreateUploadURL(
 		return nil, err
 	}
 
+	headers := make(map[string]string, len(presignedPutRequest.SignedHeader))
+	for key, values := range presignedPutRequest.SignedHeader {
+		if len(values) > 0 {
+			headers[key] = values[0]
+		} else {
+			// should record this as a metric
+		}
+	}
+
 	log.Println("presignedPutRequest", presignedPutRequest)
 	result := &UploadURLResult{
-		Method:        presignedPutRequest.Method,
-		URL:           presignedPutRequest.URL,
-		SignedHeaders: presignedPutRequest.SignedHeader,
+		Method:       presignedPutRequest.Method,
+		URL:          presignedPutRequest.URL,
+		SignedHeader: headers,
 	}
 
 	return result, nil

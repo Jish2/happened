@@ -52,6 +52,7 @@ func Test_CreateUploadURLHandler(t *testing.T) {
 				body := test.DecodeAs[server.CreateUploadURLBody](resp.Body, t)
 				assert.Equal(t, tc.expectedMethod, body.Method)
 				assert.NotEmpty(t, body.UploadURL)
+				assert.NotNil(t, body.SignedHeaders)
 			}
 		})
 	}
