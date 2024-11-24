@@ -1,4 +1,4 @@
-import { getGreetingByName } from "@/gen/openapi";
+import { getGreeting } from "@/gen/openapi";
 import { SignedIn, SignedOut, useClerk, useUser } from "@clerk/clerk-expo";
 import axios, { AxiosError } from "axios";
 import { Link } from "expo-router";
@@ -17,7 +17,7 @@ export default function Page() {
   useEffect(() => {
     const loadName = async () => {
       try {
-        const res = await getGreetingByName("name");
+        const res = await getGreeting("name");
         setName(res.data.message);
       } catch (e) {
         if (e instanceof AxiosError) console.error(e.message);
