@@ -1,5 +1,40 @@
 components:
   schemas:
+    CreateUploadURLBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/CreateUploadURLBody.json
+          format: uri
+          readOnly: true
+          type: string
+        method:
+          type: string
+        upload_url:
+          type: string
+      required:
+        - method
+        - upload_url
+      type: object
+    CreateUploadURLRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/CreateUploadURLRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        image_key:
+          examples:
+            - my-image.jpeg
+          type: string
+      required:
+        - image_key
+      type: object
     ErrorDetail:
       additionalProperties: false
       properties:
@@ -77,16 +112,34 @@ components:
       required:
         - message
       type: object
-  securitySchemes:
-    BearerAuth:
-      bearerFormat: JWT
-      scheme: bearer
-      type: http
 info:
-  title: My API
+  title: Happened API
   version: 1.0.0
 openapi: 3.1.0
 paths:
+  /create-upload-url:
+    get:
+      operationId: get-create-upload-url
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUploadURLRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateUploadURLBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Get create upload URL
   /greeting/protected/{name}:
     get:
       description: Protected version of greet

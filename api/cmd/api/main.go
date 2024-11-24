@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"happenedapi/pkg/images"
 	"happenedapi/pkg/server"
 	"log"
 	"log/slog"
@@ -17,7 +18,9 @@ import (
 	"github.com/caarlos0/env/v11"
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 	"github.com/danielgtaylor/huma/v2/humacli"
+	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 
@@ -25,12 +28,12 @@ import (
 )
 
 type Config struct {
-	DbHost string `env:"DB_HOST"`
-	DbUser string `env:"DB_USER"`
-	DbPass string `env:"DB_PASS"`
-	DbName string `env:"DB_NAME"`
-	DbPort int    `env:"DB_PORT"`
-    ClerkSecretKey string `env:"CLERK_SECRET_KEY"`
+	DbHost         string `env:"DB_HOST"`
+	DbUser         string `env:"DB_USER"`
+	DbPass         string `env:"DB_PASS"`
+	DbName         string `env:"DB_NAME"`
+	DbPort         int    `env:"DB_PORT"`
+	ClerkSecretKey string `env:"CLERK_SECRET_KEY"`
 }
 
 const (
@@ -57,7 +60,9 @@ func main() {
 	cli := humacli.New(func(hooks humacli.Hooks, opts *Options) {
 		// Create empty server for generating openapi.yaml
 		ctx := context.Background()
-		api = server.New(nil)
+
+		api = humachi.New(chi.NewRouter(), huma.DefaultConfig("Happened API", "1.0.0"))
+		server.RegisterAPI(api, nil, nil)
 		var srv http.Server
 
 		if opts.Stage == Production {
@@ -77,7 +82,6 @@ func main() {
 				}
 			}
 
-
 			// Parse env into config
 			var config Config
 			err = env.Parse(&config)
@@ -85,13 +89,13 @@ func main() {
 				slog.Error("parsing env to config", slog.Any("error", err))
 				os.Exit(1)
 			}
-            logger := slog.Default()
+			logger := slog.Default()
 
-            logger.Info("setting clerk secret key from environment config")
-            clerk.SetKey(config.ClerkSecretKey)
-			
+			logger.Info("setting clerk secret key from environment config")
+			clerk.SetKey(config.ClerkSecretKey)
+
 			logger.Info("config: ", slog.Any("config", config))
-            logger.Info("huma options: ", slog.Any("options", opts))
+			logger.Info("huma options: ", slog.Any("options", opts))
 			connString := pgConnString(config)
 
 			// Setup Dependencies
@@ -101,16 +105,15 @@ func main() {
 				slog.Error("opening database", slog.Any("error", err))
 				os.Exit(1)
 			}
-            logger.Info("pinging db")
+			logger.Info("pinging db")
 
-            dbctx, cancel := context.WithTimeout(ctx, time.Second * 5)
-            defer cancel()
+			dbctx, cancel := context.WithTimeout(ctx, time.Second*5)
+			defer cancel()
 			if err := db.PingContext(dbctx); err != nil {
 				slog.Error("pinging db", slog.Any("error", err))
 				os.Exit(1)
 			}
-            logger.Info("successfully pinged db")
-
+			logger.Info("successfully pinged db")
 
 			cfg, err := awsConfig.LoadDefaultConfig(ctx)
 			if err != nil {
@@ -122,8 +125,10 @@ func main() {
 			s3Client := s3.NewFromConfig(cfg)
 			_ = s3Client
 
+			imageService := images.NewService(s3Client)
+
 			// Create server
-			api = server.New(db)
+			server.RegisterAPI(api, db, imageService)
 			srv = http.Server{
 				Addr:    fmt.Sprintf(":%d", Port),
 				Handler: api.Adapter(),
