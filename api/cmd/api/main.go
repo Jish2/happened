@@ -15,6 +15,7 @@ import (
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/caarlos0/env/v11"
+	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/humacli"
 	"github.com/joho/godotenv"
@@ -29,6 +30,7 @@ type Config struct {
 	DbPass string `env:"DB_PASS"`
 	DbName string `env:"DB_NAME"`
 	DbPort int    `env:"DB_PORT"`
+    ClerkSecretKey string `env:"CLERK_SECRET_KEY"`
 }
 
 const (
@@ -58,17 +60,15 @@ func main() {
 		api = server.New(nil)
 		var srv http.Server
 
-		stage := Development
 		if opts.Stage == Production {
 			slog.Info("launching server in production mode")
-			stage = Production
 		} else {
 			slog.Info("defaulting to server development mode")
 		}
 
 		hooks.OnStart(func() {
 			var err error
-			if stage == Development {
+			if opts.Stage == Development {
 				// Load .env
 				err := godotenv.Load(".env")
 				if err != nil {
@@ -77,6 +77,7 @@ func main() {
 				}
 			}
 
+
 			// Parse env into config
 			var config Config
 			err = env.Parse(&config)
@@ -84,9 +85,13 @@ func main() {
 				slog.Error("parsing env to config", slog.Any("error", err))
 				os.Exit(1)
 			}
+            logger := slog.Default()
 
-			logger := slog.Default()
+            logger.Info("setting clerk secret key from environment config")
+            clerk.SetKey(config.ClerkSecretKey)
+			
 			logger.Info("config: ", slog.Any("config", config))
+            logger.Info("huma options: ", slog.Any("options", opts))
 			connString := pgConnString(config)
 
 			// Setup Dependencies
@@ -96,10 +101,16 @@ func main() {
 				slog.Error("opening database", slog.Any("error", err))
 				os.Exit(1)
 			}
-			if err := db.Ping(); err != nil {
+            logger.Info("pinging db")
+
+            dbctx, cancel := context.WithTimeout(ctx, time.Second * 5)
+            defer cancel()
+			if err := db.PingContext(dbctx); err != nil {
 				slog.Error("pinging db", slog.Any("error", err))
 				os.Exit(1)
 			}
+            logger.Info("successfully pinged db")
+
 
 			cfg, err := awsConfig.LoadDefaultConfig(ctx)
 			if err != nil {

@@ -111,8 +111,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
-      security:
-        - BearerAuth: []
+      security: []
       summary: Get a protected greeting
       tags:
         - Greetings
