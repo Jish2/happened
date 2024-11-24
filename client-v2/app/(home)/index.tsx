@@ -4,6 +4,9 @@ import { Link } from "expo-router";
 import { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
+axios.defaults.baseURL =
+  process.env.EXPO_PUBLIC_API_URL || "http://localhost:8080";
+
 export default function Page() {
   const { user } = useUser();
 
