@@ -77,6 +77,11 @@ components:
       required:
         - message
       type: object
+  securitySchemes:
+    BearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
 info:
   title: My API
   version: 1.0.0

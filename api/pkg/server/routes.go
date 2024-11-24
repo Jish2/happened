@@ -49,14 +49,14 @@ func New(db *sql.DB) huma.API {
 	
 
 	config := huma.DefaultConfig("My API", "1.0.0")
-	// config.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
-	// 	"BearerAuth": {
-	// 		Type: "http",
-	// 		In: "header",
-	// 		Scheme: "bearer",
-	// 		BearerFormat: "Bearer <clerk_token>",
-	// 	},
-	// }
+	config.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
+		"BearerAuth": {
+			Type:         "http",
+			Scheme:       "bearer",
+			BearerFormat: "JWT",
+		},
+	}
+
 	api := humachi.New(r, config)
 	registerRoutes(api, db)
 
@@ -87,9 +87,9 @@ func registerRoutes(
 		Summary:            "Get a protected greeting",
 		Description:        "Protected version of greet",
 		Security:           []map[string][]string{
-			// {
-			// 	"BearerAuth": {},
-			// },
+			{
+				"BearerAuth": {},
+			},
 		},
 	}, protectedGreetHandler())
 	
