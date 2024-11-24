@@ -52,14 +52,28 @@ export interface ErrorModel {
 
 
   /**
- * @summary Get greeting by name
+ * Protected version of greet
+ * @summary Get a protected greeting
  */
-export const getGreetingByName = <TData = AxiosResponse<GreetingOutputBody>>(
+export const protectedGreet = <TData = AxiosResponse<GreetingOutputBody>>(
     name: string, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.get(
-      `/greeting/${name}`,options
+      `/greeting/protected/${name}`,options
     );
   }
 
-export type GetGreetingByNameResult = AxiosResponse<GreetingOutputBody>
+/**
+ * Get a greeting for a person by name.
+ * @summary Get a greeting
+ */
+export const getGreeting = <TData = AxiosResponse<GreetingOutputBody>>(
+    name: string, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/greeting/public/${name}`,options
+    );
+  }
+
+export type ProtectedGreetResult = AxiosResponse<GreetingOutputBody>
+export type GetGreetingResult = AxiosResponse<GreetingOutputBody>

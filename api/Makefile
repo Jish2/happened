@@ -27,7 +27,7 @@ image:
 push:
 	docker push anmho/happened
 
-watch: db
+watch:
 	@air
 
 # Database commands
