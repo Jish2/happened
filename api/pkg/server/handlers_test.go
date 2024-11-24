@@ -3,7 +3,7 @@ package server_test
 import (
 	"fmt"
 	"happenedapi/pkg/server"
-	test "happenedapi/pkg/tests"
+	test "happenedapi/pkg/test"
 	"net/http"
 	"testing"
 

@@ -3,6 +3,7 @@ package server
 import (
 	"database/sql"
 	"fmt"
+	"github.com/clerk/clerk-sdk-go/v2/jwt"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
