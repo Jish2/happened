@@ -25,23 +25,20 @@ import (
 )
 
 type Config struct {
-	DbHost string `env:"DB_HOST"`
-	DbUser string `env:"DB_USER"`
-	DbPass string `env:"DB_PASS"`
-	DbName string `env:"DB_NAME"`
-	DbPort int    `env:"DB_PORT"`
-    ClerkSecretKey string `env:"CLERK_SECRET_KEY"`
+	DbHost         string `env:"DB_HOST"`
+	DbUser         string `env:"DB_USER"`
+	DbPass         string `env:"DB_PASS"`
+	DbName         string `env:"DB_NAME" `
+	DbPort         int    `env:"DB_PORT"`
+	Port           int    `env:"PORT" envDefault:"8080"`
+	ClerkSecretKey string `env:"CLERK_SECRET_KEY"`
 }
 
-const (
-	Port = 8080
-)
-
 type Options struct {
-	Debug bool   `doc:"Enable debug logging"`
-	Host  string `doc:"Hostname to listen on."`
-	Port  int    `doc:"Port to listen on." short:"p" default:"8080"`
-	Stage string `doc:"environment" short:"s" default:"development"`
+	Debug bool `doc:"Enable debug logging"`
+	//Host  string `doc:"Hostname to listen on."`
+	//Port  int    `doc:"Port to listen on." short:"p" default:"8080"`
+	Stage string `doc:"environment" short:"s" default:"production"`
 }
 
 type Stage = string
@@ -59,12 +56,15 @@ func main() {
 		ctx := context.Background()
 		api = server.New(nil)
 		var srv http.Server
-
+		slog.Info("starting server with", slog.Any("options", opts))
 		if opts.Stage == Production {
 			slog.Info("launching server in production mode")
 		} else {
 			slog.Info("defaulting to server development mode")
 		}
+		slog.Info("forcing production")
+
+		opts.Stage = Production
 
 		hooks.OnStart(func() {
 			var err error
@@ -77,7 +77,6 @@ func main() {
 				}
 			}
 
-
 			// Parse env into config
 			var config Config
 			err = env.Parse(&config)
@@ -85,13 +84,13 @@ func main() {
 				slog.Error("parsing env to config", slog.Any("error", err))
 				os.Exit(1)
 			}
-            logger := slog.Default()
+			logger := slog.Default()
 
-            logger.Info("setting clerk secret key from environment config")
-            clerk.SetKey(config.ClerkSecretKey)
-			
+			logger.Info("setting clerk secret key from environment config")
+			clerk.SetKey(config.ClerkSecretKey)
+
 			logger.Info("config: ", slog.Any("config", config))
-            logger.Info("huma options: ", slog.Any("options", opts))
+			logger.Info("huma options: ", slog.Any("options", opts))
 			connString := pgConnString(config)
 
 			// Setup Dependencies
@@ -101,16 +100,15 @@ func main() {
 				slog.Error("opening database", slog.Any("error", err))
 				os.Exit(1)
 			}
-            logger.Info("pinging db")
+			logger.Info("pinging db")
 
-            dbctx, cancel := context.WithTimeout(ctx, time.Second * 5)
-            defer cancel()
+			dbctx, cancel := context.WithTimeout(ctx, time.Second*5)
+			defer cancel()
 			if err := db.PingContext(dbctx); err != nil {
 				slog.Error("pinging db", slog.Any("error", err))
 				os.Exit(1)
 			}
-            logger.Info("successfully pinged db")
-
+			logger.Info("successfully pinged db")
 
 			cfg, err := awsConfig.LoadDefaultConfig(ctx)
 			if err != nil {
@@ -125,11 +123,11 @@ func main() {
 			// Create server
 			api = server.New(db)
 			srv = http.Server{
-				Addr:    fmt.Sprintf(":%d", Port),
+				Addr:    fmt.Sprintf(":%d", config.Port),
 				Handler: api.Adapter(),
 			}
 
-			logger.Info("server listening", slog.Int("port", Port))
+			logger.Info("server listening", slog.Int("port", config.Port))
 			if err = srv.ListenAndServe(); err != nil {
 				if errors.Is(err, http.ErrServerClosed) {
 					slog.Info("shutting down server")

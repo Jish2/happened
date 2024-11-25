@@ -1,4 +1,8 @@
 
+BRANCH_NAME := $(shell git rev-parse --abbrev-ref HEAD)
+COMMIT_HASH := $(shell git rev-parse --short HEAD)
+IMAGE_NAME := anmho/happened
+
 default: api
 
 .PHONY: watch migrate
@@ -22,10 +26,10 @@ api:
 	@go build -o ./bin/api ./cmd/api
 
 image:
-	docker build -t anmho/happened .
+	docker build -t $(IMAGE_NAME):$(COMMIT_HASH) .
 
 push:
-	docker push anmho/happened
+	docker push $(IMAGE_NAME):$(COMMIT_HASH)
 
 watch:
 	@air
