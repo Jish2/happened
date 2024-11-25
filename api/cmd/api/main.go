@@ -31,17 +31,12 @@ type Config struct {
 	DbName         string `env:"DB_NAME"`
 	DbPort         string `env:"DB_PORT"`
 	ClerkSecretKey string `env:"CLERK_SECRET_KEY"`
+	Port           int    `env:"PORT" envDefault:"8080"`
 }
 
-const (
-	Port = 8080
-)
-
 type Options struct {
-	Debug bool   `doc:"Enable debug logging"`
-	Host  string `doc:"Hostname to listen on."`
-	Port  int    `doc:"Port to listen on." short:"p" default:"8080"`
-	Stage string `doc:"environment" short:"s" default:"development"`
+	Debug bool `doc:"Enable debug logging"`
+	Stage string `doc:"environment" short:"s" default:"production"`
 }
 
 type Stage = string
@@ -125,11 +120,11 @@ func main() {
 			// Create server
 			api = server.New(db, imageService)
 			srv = http.Server{
-				Addr:    fmt.Sprintf(":%d", Port),
+				Addr:    fmt.Sprintf(":%d", config.Port),
 				Handler: api.Adapter(),
 			}
 
-			logger.Info("server listening", slog.Int("port", Port))
+			logger.Info("server listening", slog.Int("port", config.Port))
 			if err = srv.ListenAndServe(); err != nil {
 				if errors.Is(err, http.ErrServerClosed) {
 					slog.Info("shutting down server")

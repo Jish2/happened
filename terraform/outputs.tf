@@ -18,3 +18,7 @@ output "s3_aws_region" {
 output "s3_bucket_name" {
   value = module.s3.bucket_name
 }
+
+output "cloud_run_url" {
+  value = module.cloud_run.service_url
+}
