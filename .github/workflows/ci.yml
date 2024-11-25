@@ -18,6 +18,7 @@ jobs:
       - run: echo "🍏 This job's status is ${{ job.status }}."
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,12 +30,15 @@ jobs:
 
       - name: Test
         run: make test
+        working-directory: ./api
 
       - name: Build docker image
         run: make image
+        working-directory: ./api
 
       - name: Push docker image
         run: make push
+        working-directory: ./api
 
 
 #  terraform:
