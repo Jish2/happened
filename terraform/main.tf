@@ -10,6 +10,7 @@ module "cloud_run" {
   image_url           = var.api_image_url
   location            = var.gcp_region
   deletion_protection = var.cloud_run_deletion_protection
-  name                = "happened-api"
-  port                = "5678"
+  name                = var.api_name
+  port                = var.api_port
 }
+

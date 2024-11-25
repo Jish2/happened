@@ -26,6 +26,17 @@ variable "api_image_url" {
   default = "docker.io/hashicorp/http-echo"
 }
 
+variable "api_name" {
+  description = "Name of the Cloud Run service to deploy"
+  type = string
+  default = "happened-api"
+}
+
+variable "api_port" {
+  description = "Port API is listening on"
+  type = string
+  default = "5678"
+}
 
 variable "cloud_run_deletion_protection" {
   description = "Enable deletion protection"
