@@ -1,29 +1,20 @@
-
-# Output the bucket name and ARN
-output "bucket_name" {
-  value = aws_s3_bucket.happened-bucket.id
+output "s3_iam_admin_username" {
+  value = module.s3.iam_admin_username
 }
 
-output "bucket_arn" {
-  value = aws_s3_bucket.happened-bucket.arn
+output "s3_iam_admin_id" {
+  value = module.s3.iam_admin_id
 }
 
-output "iam_admin_username" {
-  value = aws_iam_access_key.admin.user
-}
-
-output "iam_admin_id" {
-  value = aws_iam_access_key.admin.id
-}
-
-output "iam_admin_secret" {
-  value = aws_iam_access_key.admin.secret
+output "s3_iam_admin_secret" {
+  value     = module.s3.iam_admin_secret
   sensitive = true
 }
 
-output "aws_region" {
-  value = var.region
+output "s3_aws_region" {
+  value = module.s3.aws_region
 }
 
-
-
+output "s3_bucket_name" {
+  value = module.s3.bucket_name
+}
