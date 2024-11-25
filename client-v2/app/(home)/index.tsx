@@ -3,7 +3,9 @@ import { SignedIn, SignedOut, useClerk, useUser } from "@clerk/clerk-expo";
 import axios, { AxiosError } from "axios";
 import { Link } from "expo-router";
 import { useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView, Text, TouchableOpacity } from "react-native";
+import { SearchAutocomplete } from "@/components/search-autocomplete";
+import "react-native-get-random-values";
 
 axios.defaults.baseURL =
   process.env.EXPO_PUBLIC_API_URL || "http://localhost:8080";
@@ -28,11 +30,12 @@ export default function Page() {
   }, []);
 
   return (
-    <View className="justify-center items-center flex-1">
+    <SafeAreaView className="justify-center items-center flex-1">
+      <SearchAutocomplete />
+
       <Text>Name: {name || "no name"}</Text>
       <SignedIn>
         <Text>Hello {user?.phoneNumbers[0]?.phoneNumber}</Text>
-        <Text>{JSON.stringify(user, null, 2)}</Text>
         <TouchableOpacity
           onPress={() => {
             signOut();
@@ -49,6 +52,6 @@ export default function Page() {
           <Text>Sign Up</Text>
         </Link>
       </SignedOut>
-    </View>
+    </SafeAreaView>
   );
 }
