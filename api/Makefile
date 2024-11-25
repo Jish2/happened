@@ -1,7 +1,6 @@
+include .env
 
-BRANCH_NAME := $(shell git rev-parse --abbrev-ref HEAD)
-COMMIT_HASH := $(shell git rev-parse --short HEAD)
-IMAGE_NAME := anmho/happened
+
 
 default: api
 
@@ -32,11 +31,17 @@ test:
 api:
 	@go build -o ./bin/api ./cmd/api
 
+
+IMAGE_NAME := anmho/happened
+GIT_COMMIT_HASH = $(shell git rev-parse --short HEAD)
+TAG ?= $(GIT_COMMIT_HASH)
 image:
-	docker build -t $(IMAGE_NAME):$(COMMIT_HASH) .
+	@docker build -t $(IMAGE_NAME):$(TAG) .
+	@echo docker.io/$(IMAGE_NAME):$(TAG) | tee image.txt
 
 push:
-	docker push $(IMAGE_NAME):$(COMMIT_HASH)
+	@docker push $(IMAGE_NAME):$(TAG)
+	@echo docker.io/$(IMAGE_NAME):$(TAG) | tee image.txt
 
 watch:
 	@air
