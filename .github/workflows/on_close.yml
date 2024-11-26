@@ -1,0 +1,27 @@
+name: Pull Request Closed or Branch Deleted
+
+# Delete the preview deployment
+
+on:
+  pull_request:
+    types:
+      - closed # Trigger when a pull request is closed (whether merged or not)
+  delete:
+
+jobs:
+  delete_branch_preview:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Handle pull request closed or branch deleted
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.pull_request.merged }}" == "true" ]]; then
+            echo "Pull request merged and closed!"
+          elif [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.pull_request.merged }}" == "false" ]]; then
+            echo "Pull request closed without merge."
+          elif [[ "${{ github.event_name }}" == "delete" ]]; then
+            echo "Branch ${GITHUB_REF} was deleted!"
+          fi
