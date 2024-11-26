@@ -73,15 +73,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup tmate session
-        env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASS: ${{ secrets.DB_PASS }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
-        uses: mxschmitt/action-tmate@v3
+      #   - name: Setup tmate session
+      #     env:
+      #       DB_HOST: ${{ secrets.DB_HOST }}
+      #       DB_USER: ${{ secrets.DB_USER }}
+      #       DB_PASS: ${{ secrets.DB_PASS }}
+      #       DB_NAME: ${{ secrets.DB_NAME }}
+      #       DB_PORT: ${{ secrets.DB_PORT }}
+      #       CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      #     uses: mxschmitt/action-tmate@v3
 
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
@@ -102,7 +102,6 @@ jobs:
           DB_PORT: ${{ secrets.DB_PORT }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
         run: |-
-
           ./generate.sh
           cat service.yaml
 
@@ -119,7 +118,3 @@ jobs:
         working-directory: infra/helm
         run: |
           ./deploy.sh
-        # uses: 'google-github-actions/deploy-cloudrun@v2'
-        # with:
-        #   metadata: infra/helm/service.yaml
-        #   region: us-west1
