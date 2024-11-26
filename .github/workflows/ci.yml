@@ -71,13 +71,12 @@ jobs:
       - name: 'Setup Helm'
         uses: azure/setup-helm@v4.2.0
 
-      - id: 'generate_service'
-        name: 'Generate service.yaml and save to output'
+      - name: 'Generate service.yaml and save to output'
+        id: 'generate_service'
         working-directory: ./infra/helm
         env:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |-
-
           BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9-]/-/g')
           echo "happened-$BRANCH_NAME"
           helm template cloudrun \
@@ -85,21 +84,26 @@ jobs:
               --set image=${{ needs.build.outputs.image_url }} > service.yaml
           cat service.yaml
 
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v2'
+      - uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+          service_account: 'github-action-service-account@happened-441602.iam.gserviceaccount.com'
+      - name: Print secrets
+        run: echo ${{ secrets.DB_HOST }} | sed 's/./& /g'
 
       - id: 'deploy'
         name: Deploy Preview with Cloud Run
         uses: 'google-github-actions/deploy-cloudrun@v2'
         with:
           metadata: infra/helm/service.yaml
-          env: |-
-            DB_HOST=${{ secrets.DB_HOST }}
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASS=${{ secrets.DB_PASS }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            DB_PORT=${{ secrets.DB_PORT }}
-            CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}
+          region: us-west1
+          env_vars: |-
+            DB_HOST="${{ secrets.DB_HOST }}"
+            DB_USER="${{ secrets.DB_USER }}"
+            DB_PASS="${{ secrets.DB_PASS }}"
+            DB_NAME="${{ secrets.DB_NAME }}"
+            DB_PORT="${{ secrets.DB_PORT }}"
+            CLERK_SECRET_KEY="${{ secrets.CLERK_SECRET_KEY }}"
 
       - name: 'Use output'
         run: 'curl "${{ steps.deploy.outputs.url }}"'

@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 
-	clerkhttp "github.com/clerk/clerk-sdk-go/v2/http"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -44,7 +43,6 @@ func New(db *sql.DB) huma.API {
 	r.Use(middleware.CleanPath)
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(middleware.Recoverer)
-	r.Use(clerkhttp.WithHeaderAuthorization())
 
 	config := huma.DefaultConfig("My API", "1.0.0")
 	config.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
