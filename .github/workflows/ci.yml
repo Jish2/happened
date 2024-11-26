@@ -2,10 +2,8 @@ name: Build and Deploy Preview
 run-name: CI - Pull Request
 on: [push]
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-    outputs:
-      image_url: ${{ steps.push_image.outputs.image_url }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -18,6 +16,20 @@ jobs:
       - name: Test
         run: make test
         working-directory: ./api
+
+  build:
+    needs: [test]
+    runs-on: ubuntu-latest
+    outputs:
+      image_url: ${{ steps.push_image.outputs.image_url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.2'
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -52,24 +64,39 @@ jobs:
       - name: 'Setup Helm'
         uses: azure/setup-helm@v4.2.0
 
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v2'
-
       - id: 'generate_service'
         name: 'Generate service.yaml and save to output'
         working-directory: ./infra/helm
-        run: |
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        run: |-
+          echo "happened-$BRANCH_NAME"
+          helm template cloudrun \
+            --set name="happened-$BRANCH_NAME" \
+            --set image=${{ needs.build.outputs.image_url }} \
+            > service.yaml
+
           echo 'service_yaml<<EOF' >> $GITHUB_OUTPUT
           cat service.yaml >> $GITHUB_OUTPUT
-          echo 'EOF' $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
 
+          cat service.yaml
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
       - id: 'deploy'
         name: Deploy Preview with Cloud Run
         uses: 'google-github-actions/deploy-cloudrun@v2'
         with:
-          metadata: ${{ steps.generate_service.outputs.service_yaml }}
-          image: 'gcr.io/cloudrun/hello'
-          env_vars: |
+          metadata: |-
+            ${{ steps.generate_service.outputs.service_yaml }}
+        #   env_vars: |
+        #     DB_HOST= ${{ github.secrets.DB_HOST }}
+        #     DB_USER= ${{ github.secrets.DB_USER }}
+        #     DB_PASS= ${{ github.secrets.DB_PASS }}
+        #     DB_NAME= ${{ github.secrets.DB_NAME }}
+        #     DB_PORT= ${{ github.secrets.DB_PORT }}
+        #     CLERK_SECRET_KEY= ${{ github.secrets.CLERK_SECRET_KEY }}
 
       - name: 'Use output'
         run: 'curl "${{ steps.deploy.outputs.url }}"'
