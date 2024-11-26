@@ -49,21 +49,27 @@ jobs:
         with:
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
+      - name: 'Setup Helm'
+        uses: azure/setup-helm@v4.2.0
+
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v2'
 
-      - name: Preview Deployment
-        working-directory: ./terraform
-        env:
-          IMAGE_URL: ${{ needs.build.outputs.image_url }}
-          BRANCH_NAME: ${{ github.ref_name }}
+      - id: 'generate_service'
+        name: 'Generate service.yaml and save to output'
+        working-directory: ./infra/helm
         run: |
-          echo $IMAGE_URL
-          echo $BRANCH_NAME
-          PREVIEW_NAME=$(echo "happened-$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
-          ./preview_deploy.sh $PREVIEW_NAME $IMAGE_URL
-          gcloud services describe "happened-$BRANCH_NAME" --format 'value(status.url)'
-        
-    
+          echo 'service_yaml<<EOF' >> $GITHUB_OUTPUT
+          cat service.yaml >> $GITHUB_OUTPUT
+          echo 'EOF' $GITHUB_OUTPUT
 
+      - id: 'deploy'
+        name: Deploy Preview with Cloud Run
+        uses: 'google-github-actions/deploy-cloudrun@v2'
+        with:
+          metadata: ${{ steps.generate_service.outputs.service_yaml }}
+          image: 'gcr.io/cloudrun/hello'
+          env_vars: |
 
+      - name: 'Use output'
+        run: 'curl "${{ steps.deploy.outputs.url }}"'
