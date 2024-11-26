@@ -82,11 +82,6 @@ jobs:
       #       CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
       #     uses: mxschmitt/action-tmate@v3
 
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v2'
-        with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
-
       - name: 'Setup Helm'
         uses: azure/setup-helm@v4.2.0
 
@@ -103,6 +98,11 @@ jobs:
         run: |-
           ./generate.sh
           cat service.yaml
+
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v2'

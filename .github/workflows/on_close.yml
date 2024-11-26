@@ -16,12 +16,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
       - name: Handle pull request closed or branch deleted
-        run: |
-          if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.pull_request.merged }}" == "true" ]]; then
-            echo "Pull request merged and closed!"
-          elif [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.pull_request.merged }}" == "false" ]]; then
-            echo "Pull request closed without merge."
-          elif [[ "${{ github.event_name }}" == "delete" ]]; then
-            echo "Branch ${GITHUB_REF} was deleted!"
-          fi
+        working-directory: infra/helm
+        run: ./delete.sh
