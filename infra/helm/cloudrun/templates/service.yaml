@@ -1,9 +1,9 @@
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-    name: {{ .Values.name }}
-    labels:
-      cloud.googleapis.com/location: {{ .Values.region }}
+  name: {{ .Values.name }}
+  labels:
+    cloud.googleapis.com/location: {{ .Values.region }}
 
 spec:
   template:
@@ -23,7 +23,3 @@ spec:
             httpGet:
               path: /ping
               port: {{ .Values.port }}
-
-
-
-
