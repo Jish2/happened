@@ -16,19 +16,19 @@ import (
 	"github.com/clerk/clerk-sdk-go/v2/jwt"
 )
 
-type HumaMiddleware func (ctx huma.Context, next func(huma.Context))
+type HumaMiddleware func(ctx huma.Context, next func(huma.Context))
 
 func ClerkAuthMiddleware(api huma.API) HumaMiddleware {
-	return func (ctx huma.Context, next func(huma.Context)) {
+	return func(ctx huma.Context, next func(huma.Context)) {
 		sessionToken := strings.TrimPrefix(ctx.Header("Authorization"), "Bearer ")
-		
+
 		claims, err := jwt.Verify(ctx.Context(), &jwt.VerifyParams{
-			Token:      sessionToken,
+			Token: sessionToken,
 		})
 		if err != nil {
-			huma.WriteErr(api, ctx, 
-				http.StatusUnauthorized, 
-				"unauthorized", 
+			huma.WriteErr(api, ctx,
+				http.StatusUnauthorized,
+				"unauthorized",
 				fmt.Errorf("invalid token"),
 			)
 			return
@@ -38,7 +38,6 @@ func ClerkAuthMiddleware(api huma.API) HumaMiddleware {
 	}
 }
 
-
 func New(db *sql.DB) huma.API {
 	r := chi.NewMux()
 	r.Use(middleware.Logger)
@@ -46,7 +45,6 @@ func New(db *sql.DB) huma.API {
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(middleware.Recoverer)
 	r.Use(clerkhttp.WithHeaderAuthorization())
-	
 
 	config := huma.DefaultConfig("My API", "1.0.0")
 	config.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
@@ -80,17 +78,17 @@ func registerRoutes(
 
 	huma.Register(api, huma.Operation{
 		OperationID: "protected-greet",
-		Method: http.MethodGet,
-		Path: "/greeting/protected/{name}",
-		Middlewares:        huma.Middlewares{ClerkAuthMiddleware(api)},
+		Method:      http.MethodGet,
+		Path:        "/greeting/protected/{name}",
+		Middlewares: huma.Middlewares{ClerkAuthMiddleware(api)},
 		Tags:        []string{"Greetings"},
-		Summary:            "Get a protected greeting",
-		Description:        "Protected version of greet",
-		Security:           []map[string][]string{
+		Summary:     "Get a protected greeting",
+		Description: "Protected version of greet",
+		Security: []map[string][]string{
 			{
 				"BearerAuth": {},
 			},
 		},
 	}, protectedGreetHandler())
-	
+
 }
