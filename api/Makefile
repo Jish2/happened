@@ -1,9 +1,21 @@
+
+
 default: api
 
 .PHONY: watch migrate
 
 .PHONY: openapi
 openapi: # Generate OpenAPI specification
+deps:
+	@go install "github.com/air-verse/air@v1.61.1"
+	@brew tap golangci/tap
+	@brew install golangci/tap/golangci-lint
+
+check:
+	@go vet ./...
+	@golangci-lint run ./...
+
+openapi:
 	@./bin/api openapi > openapi.yaml
 
 

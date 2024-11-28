@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/clerk/clerk-sdk-go/v2/jwt"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -29,12 +30,15 @@ func ClerkAuthMiddleware(api huma.API) HumaMiddleware {
 			Token: sessionToken,
 		})
 		if err != nil {
-			huma.WriteErr(api, ctx,
+			err := huma.WriteErr(api, ctx,
 				http.StatusUnauthorized,
 				"unauthorized",
 				fmt.Errorf("invalid token"),
 			)
-			return
+			if err != nil {
+				slog.Error("writing error response for unauthorized token", slog.Any("error", err))
+			}
+
 		}
 		ctx = huma.WithValue(ctx, "claims", claims)
 		next(ctx)
@@ -57,8 +61,9 @@ func New(db *sql.DB, imageService *images.Service) huma.API {
 		},
 	}
 
-	api := humachi.New(chi.NewRouter(), config)
-	registerRoutes(api, db, imageService)
+	api := humachi.New(r, config)
+	registerRoutes(api, db)
+
 	return api
 }
 
