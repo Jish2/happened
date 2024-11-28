@@ -10,8 +10,6 @@ for var in "${REQUIRED_ENV_VARS[@]}"; do
   fi
 done
 
-
-
 # Write secrets to values.yaml
 VALUES_FILE="./cloudrun/values.yaml"
 echo "DB_HOST: $DB_HOST" >> $VALUES_FILE
@@ -26,13 +24,18 @@ cat "$VALUES_FILE"
 
 
 COMMIT_HASH=$(git rev-parse --short HEAD)
+echo "COMMIT_HASH=$COMMIT_HASH"
 BRANCH_NAME=$(git branch --show-current)
 # Sanitize BRANCH_NAME
 BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9-]/-/g')
+echo "BRANCH_NAME=$BRANCH_NAME"
 
 IMAGE="docker.io/anmho/happened:$COMMIT_HASH"
+echo "IMAGE=$IMAGE"
 # Run Helm template command
 SERVICE="happened-$BRANCH_NAME"
+echo "SERVICE=$SERVICE"
+
 helm template cloudrun \
     --debug \
     --set name="$SERVICE" \
