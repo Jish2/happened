@@ -1,5 +1,5 @@
 name: Build and Deploy Preview
-run-name: CI - Pull Request
+run-name: Deploying Preview for ${{ github.head_ref }}
 on:
   pull_request:
     types:
