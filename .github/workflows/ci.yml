@@ -7,7 +7,7 @@ on:
       - synchronize # Trigger on pushes to the PR branch
     paths:
       - api/**
-      - .github/workflows/ci_preview.yml
+      - .github/workflows/ci.yml
 
 jobs:
   metadata:
