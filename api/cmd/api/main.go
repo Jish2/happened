@@ -63,6 +63,19 @@ func main() {
 				slog.Info("defaulting to server development mode")
 			}
 			var err error
+			// Parse env into config
+			var config Config
+			err = env.Parse(&config)
+			if err != nil {
+				slog.Error("parsing env to config", slog.Any("error", err))
+				os.Exit(1)
+			}
+
+			logger.Info("config: ", slog.Any("config", config))
+			logger.Info("huma options: ", slog.Any("options", opts))
+
+			dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", config.DbUser, config.DbPass, config.DbHost, config.DbPort, config.DbName)
+
 			if opts.Stage == Development {
 				// Load .env
 				err := godotenv.Load(".env")
@@ -72,22 +85,10 @@ func main() {
 				}
 			}
 
-			// Parse env into config
-			var config Config
-			err = env.Parse(&config)
-			if err != nil {
-				slog.Error("parsing env to config", slog.Any("error", err))
-				os.Exit(1)
-			}
-			logger := slog.Default()
-
 			logger.Info("setting clerk secret key from environment config")
 			clerk.SetKey(config.ClerkSecretKey)
 
-			logger.Info("config: ", slog.Any("config", config))
-			logger.Info("huma options: ", slog.Any("options", opts))
-
-			dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", config.DbUser, config.DbPass, config.DbHost, config.DbPort, config.DbName)
+			connString := pgConnString(config)
 
 			// Setup Dependencies
 			// Postgres
@@ -127,7 +128,7 @@ func main() {
 			logger.Info("server listening", slog.Int("port", config.Port))
 			if err = srv.ListenAndServe(); err != nil {
 				if errors.Is(err, http.ErrServerClosed) {
-					slog.Info("shutting down server")
+					logger.Info("shutting down server")
 					os.Exit(0)
 				} else {
 					slog.Error("unexpected error", slog.Any("error", err))
