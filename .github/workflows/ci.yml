@@ -72,8 +72,7 @@ jobs:
         id: push_image
         run: |
           make push
-          IMAGE_URL=$(cat image.txt)
-          echo "image_url=$IMAGE_URL" >> $GITHUB_OUTPUT
+          cat image.txt
         working-directory: ./api
 
   preview:
@@ -83,16 +82,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      #   - name: Setup tmate session
-      #     env:
-      #       DB_HOST: ${{ secrets.DB_HOST }}
-      #       DB_USER: ${{ secrets.DB_USER }}
-      #       DB_PASS: ${{ secrets.DB_PASS }}
-      #       DB_NAME: ${{ secrets.DB_NAME }}
-      #       DB_PORT: ${{ secrets.DB_PORT }}
-      #       CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
-      #     uses: mxschmitt/action-tmate@v3
 
       - name: 'Setup Helm'
         uses: azure/setup-helm@v4.2.0
@@ -128,4 +117,4 @@ jobs:
         name: Deploy Preview with Cloud Run
         working-directory: infra/helm
         run: |
-          ./deploy.sh
+          ./deploy.sh "happened-${{ github.head_ref}}"
