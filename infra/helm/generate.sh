@@ -25,7 +25,7 @@ cat "$VALUES_FILE"
 
 COMMIT_HASH=$(git rev-parse --short HEAD)
 echo "COMMIT_HASH=$COMMIT_HASH"
-BRANCH_NAME=$(git branch --show-current)
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
 # Sanitize BRANCH_NAME
 BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9-]/-/g')
 echo "BRANCH_NAME=$BRANCH_NAME"
