@@ -1,7 +1,10 @@
 name: Build and Deploy Preview
 run-name: CI - Pull Request
 on:
-  push:
+  pull_request:
+    types:
+      - opened
+      - synchronize # Trigger on pushes to the PR branch
 #   workflow_dispatch:
 #     inputs:
 #       debug_enabled:
