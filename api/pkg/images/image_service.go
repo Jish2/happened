@@ -2,6 +2,7 @@ package images
 
 import (
 	"context"
+	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
 	"log"
 	"time"
 
@@ -14,12 +15,17 @@ const (
 )
 
 type Service struct {
-	s3Client *s3.Client
+	s3PresignClient S3PresignClient
 }
 
-func NewService(s3Client *s3.Client) *Service {
+//go:generate mockery --name=S3PresignClient
+type S3PresignClient interface {
+	PresignPutObject(ctx context.Context, params *s3.PutObjectInput, optFns ...func(*s3.PresignOptions)) (*v4.PresignedHTTPRequest, error)
+}
+
+func NewService(s3PresignClient S3PresignClient) *Service {
 	return &Service{
-		s3Client: s3Client,
+		s3PresignClient: s3PresignClient,
 	}
 }
 
@@ -34,8 +40,7 @@ func (s *Service) CreateUploadURL(
 	imageKey string,
 ) (*UploadURLResult, error) {
 
-	presignClient := s3.NewPresignClient(s.s3Client)
-	presignedPutRequest, err := presignClient.PresignPutObject(ctx, &s3.PutObjectInput{
+	presignedPutRequest, err := s.s3PresignClient.PresignPutObject(ctx, &s3.PutObjectInput{
 		Bucket:  aws.String(HappenedBucketName),
 		Key:     aws.String(imageKey),
 		Expires: aws.Time(time.Now().Add(time.Minute * 5)),

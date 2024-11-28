@@ -17,10 +17,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/caarlos0/env/v11"
 	"github.com/clerk/clerk-sdk-go/v2"
-	"github.com/danielgtaylor/huma/v2"
-	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 	"github.com/danielgtaylor/huma/v2/humacli"
-	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 
@@ -32,7 +29,7 @@ type Config struct {
 	DbUser         string `env:"DB_USER"`
 	DbPass         string `env:"DB_PASS"`
 	DbName         string `env:"DB_NAME"`
-	DbPort         int    `env:"DB_PORT"`
+	DbPort         string `env:"DB_PORT"`
 	ClerkSecretKey string `env:"CLERK_SECRET_KEY"`
 }
 
@@ -54,24 +51,22 @@ const (
 	Production        = "production"
 )
 
-var api huma.API
-
 func main() {
+
+	// Create empty server for generating openapi.yaml with the CLI
+	api := server.New(nil, nil)
+
+	// Start up and stop hooks
 	cli := humacli.New(func(hooks humacli.Hooks, opts *Options) {
-		// Create empty server for generating openapi.yaml
-		ctx := context.Background()
-
-		api = humachi.New(chi.NewRouter(), huma.DefaultConfig("Happened API", "1.0.0"))
-		server.RegisterAPI(api, nil, nil)
 		var srv http.Server
-
-		if opts.Stage == Production {
-			slog.Info("launching server in production mode")
-		} else {
-			slog.Info("defaulting to server development mode")
-		}
-
 		hooks.OnStart(func() {
+			ctx := context.Background()
+
+			if opts.Stage == Production {
+				slog.Info("launching server in production mode")
+			} else {
+				slog.Info("defaulting to server development mode")
+			}
 			var err error
 			if opts.Stage == Development {
 				// Load .env
@@ -96,11 +91,12 @@ func main() {
 
 			logger.Info("config: ", slog.Any("config", config))
 			logger.Info("huma options: ", slog.Any("options", opts))
-			connString := pgConnString(config)
+
+			dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", config.DbUser, config.DbPass, config.DbHost, config.DbPort, config.DbName)
 
 			// Setup Dependencies
 			// Postgres
-			db, err := sql.Open("pgx", connString)
+			db, err := sql.Open("pgx", dbURL)
 			if err != nil {
 				slog.Error("opening database", slog.Any("error", err))
 				os.Exit(1)
@@ -123,12 +119,11 @@ func main() {
 
 			// Setup S3 bucket
 			s3Client := s3.NewFromConfig(cfg)
-			_ = s3Client
-
-			imageService := images.NewService(s3Client)
+			s3PresignClient := s3.NewPresignClient(s3Client)
+			imageService := images.NewService(s3PresignClient)
 
 			// Create server
-			server.RegisterAPI(api, db, imageService)
+			api = server.New(db, imageService)
 			srv = http.Server{
 				Addr:    fmt.Sprintf(":%d", Port),
 				Handler: api.Adapter(),
@@ -157,6 +152,7 @@ func main() {
 		})
 	})
 
+	// Additional command for generating the OpenAPI specification
 	cli.Root().AddCommand(&cobra.Command{
 		Use:   "openapi",
 		Short: "Print the OpenAPI spec",
@@ -170,13 +166,4 @@ func main() {
 	})
 
 	cli.Run()
-}
-
-func pgConnString(config Config) string {
-	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s",
-		config.DbHost,
-		config.DbPort,
-		config.DbUser,
-		config.DbPass,
-		config.DbName)
 }

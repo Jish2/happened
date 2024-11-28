@@ -15,6 +15,7 @@ jobs:
 
       - name: Test
         run: make test
+
         working-directory: ./api
 
       - name: Login to Docker Hub

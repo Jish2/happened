@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/clerk/clerk-sdk-go/v2/jwt"
 	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"happenedapi/pkg/images"
@@ -35,14 +36,14 @@ func ClerkAuthMiddleware(api huma.API) HumaMiddleware {
 	}
 }
 
-func RegisterAPI(api huma.API, db *sql.DB, imageService *images.Service) {
-	r := chi.NewMux()
+func New(db *sql.DB, imageService *images.Service) huma.API {
+	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.CleanPath)
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(middleware.Recoverer)
 
-	config := huma.DefaultConfig("My API", "1.0.0")
+	config := huma.DefaultConfig("Happened API", "1.0.0")
 	config.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
 		"BearerAuth": {
 			Type:         "http",
@@ -51,8 +52,9 @@ func RegisterAPI(api huma.API, db *sql.DB, imageService *images.Service) {
 		},
 	}
 
+	api := humachi.New(chi.NewRouter(), config)
 	registerRoutes(api, db, imageService)
-
+	return api
 }
 
 func registerRoutes(
