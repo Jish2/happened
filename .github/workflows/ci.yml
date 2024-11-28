@@ -10,19 +10,7 @@ on:
       - .github/workflows/ci.yml
 
 jobs:
-  metadata:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Check env
-        run: |
-          echo "base_ref ${{ github.base_ref }}"
-          echo "head_ref ${{ github.head_ref }}"
-          echo "ref ${{ github.ref }}"
-          echo "ref_name ${{ github.ref_name }}"
-          git rev-parse --abbrev-ref HEAD
-  test:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -36,10 +24,36 @@ jobs:
             '**/go.sum'
             '**/go.mod
 
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.60
+          working-directory: api
+
+  test:
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.2'
+          cache-dependency-path: |
+            '**/go.sum'
+            '**/go.mod
+
+            - name: golangci-lint
+            uses: golangci/golangci-lint-action@v6
+            with:
+              version: v1.60
+
       - name: Test
         run: make test
 
-        working-directory: ./api
+        working-directory: api
 
   build:
     needs: [test]
@@ -66,14 +80,14 @@ jobs:
 
       - name: Build docker image
         run: make image
-        working-directory: ./api
+        working-directory: api
 
       - name: Push docker image
         id: push_image
         run: |
           make push
           cat image.txt
-        working-directory: ./api
+        working-directory: api
 
   preview:
     runs-on: ubuntu-latest
