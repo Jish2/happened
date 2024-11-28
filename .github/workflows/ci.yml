@@ -5,6 +5,9 @@ on:
     types:
       - opened
       - synchronize # Trigger on pushes to the PR branch
+    paths:
+      - api/**
+      - .github/workflows/ci_preview.yml
 
 jobs:
   metadata:
