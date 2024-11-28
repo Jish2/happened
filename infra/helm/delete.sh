@@ -12,4 +12,4 @@ fi
 DEPLOYMENT_NAME=$(echo "$DEPLOYMENT_NAME" | sed 's/[^a-zA-Z0-9-]/-/g')
 
 
-gcloud run services delete happened "$DEPLOYMENT_NAME" --region us-west1 --quiet
+gcloud run services delete "$DEPLOYMENT_NAME" --region us-west1 --quiet
