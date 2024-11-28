@@ -125,4 +125,4 @@ jobs:
         name: Deploy Preview with Cloud Run
         working-directory: infra/helm
         run: |
-          ./deploy.sh "happened-${{ github.head_ref}}"
+          ./deploy.sh "happened-${{ github.head_ref }}"
