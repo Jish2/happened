@@ -113,11 +113,6 @@ jobs:
           ./generate.sh "happened-${{ github.head_ref}}"
           cat service.yaml
 
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v2'
-        with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
-
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v2'
 
