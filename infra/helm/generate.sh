@@ -34,13 +34,11 @@ cat "$VALUES_FILE"
 
 
 COMMIT_HASH=$(git rev-parse --short HEAD)
-BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-# Sanitize BRANCH_NAME
-BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9-]/-/g')
+# Sanitize DEPLOYMENT_NAME
+DEPLOYMENT_NAME=$(echo "$DEPLOYMENT_NAME" | sed 's/[^a-zA-Z0-9-]/-/g')
 
 IMAGE="docker.io/anmho/happened:$COMMIT_HASH"
 # Run Helm template command
-SERVICE="happened-$BRANCH_NAME"
 helm template cloudrun \
     --debug \
     --set name="$DEPLOYMENT_NAME" \
