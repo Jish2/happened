@@ -19,7 +19,6 @@ jobs:
           echo "ref ${{ github.ref }}"
           echo "ref_name ${{ github.ref_name }}"
           git rev-parse --abbrev-ref HEAD
-          git symbolic-ref --short HEAD
 
   test:
     runs-on: ubuntu-latest
