@@ -1,4 +1,4 @@
-name: Pull Request Closed or Branch Deleted
+name: Clean Up PR Preview Deployment
 
 # Delete the preview deployment
 

@@ -1,9 +1,15 @@
 #!/bin/bash
 
 set -e
-BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-# Sanitize BRANCH_NAME
-BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9-]/-/g')
 
-NAME="happened-$BRANCH_NAME"
-gcloud run services delete happened "$NAME" --region us-west1 --quiet
+DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-$1}"
+
+if [ -z "$DEPLOYMENT_NAME" ]; then
+  echo "ERROR: DEPLOYMENT_NAME is required."
+  exit 1
+fi
+# Sanitize DEPLOYMENT_NAME
+DEPLOYMENT_NAME=$(echo "$DEPLOYMENT_NAME" | sed 's/[^a-zA-Z0-9-]/-/g')
+
+
+gcloud run services delete happened "$DEPLOYMENT_NAME" --region us-west1 --quiet
