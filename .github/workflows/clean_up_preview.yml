@@ -1,5 +1,5 @@
 name: Clean Up PR Preview Deployment
-
+run-name: Clean Up Preview for ${{ github.head_ref }}
 # Delete the preview deployment
 
 on:
@@ -34,4 +34,4 @@ jobs:
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
       - name: Handle pull request closed or branch deleted
         working-directory: infra/helm
-        run: ./delete.sh "happened-${{ github.head_ref}}"
+        run: ./delete.sh "happened-${{ github.head_ref }}"
