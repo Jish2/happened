@@ -1,5 +1,5 @@
 name: Build and Deploy Preview
-run-name: CI - Pull Request
+run-name: CI Preview - Pull Request
 on:
   pull_request:
     types:
@@ -28,8 +28,6 @@ jobs:
   build:
     needs: [test]
     runs-on: ubuntu-latest
-    outputs:
-      image_url: ${{ steps.push_image.outputs.image_url }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -56,8 +54,7 @@ jobs:
         id: push_image
         run: |
           make push
-          IMAGE_URL=$(cat image.txt)
-          echo "image_url=$IMAGE_URL" >> $GITHUB_OUTPUT
+          cat image.txt
         working-directory: ./api
 
   preview:
