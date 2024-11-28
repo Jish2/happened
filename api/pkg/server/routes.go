@@ -3,32 +3,30 @@ package server
 import (
 	"database/sql"
 	"fmt"
-	"net/http"
-	"strings"
-
-	clerkhttp "github.com/clerk/clerk-sdk-go/v2/http"
-	"github.com/danielgtaylor/huma/v2/adapters/humachi"
-
+	"github.com/clerk/clerk-sdk-go/v2/jwt"
 	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"happenedapi/pkg/images"
 
-	"github.com/clerk/clerk-sdk-go/v2/jwt"
+	"net/http"
+	"strings"
 )
 
-type HumaMiddleware func (ctx huma.Context, next func(huma.Context))
+type HumaMiddleware func(ctx huma.Context, next func(huma.Context))
 
 func ClerkAuthMiddleware(api huma.API) HumaMiddleware {
-	return func (ctx huma.Context, next func(huma.Context)) {
+	return func(ctx huma.Context, next func(huma.Context)) {
 		sessionToken := strings.TrimPrefix(ctx.Header("Authorization"), "Bearer ")
-		
+
 		claims, err := jwt.Verify(ctx.Context(), &jwt.VerifyParams{
-			Token:      sessionToken,
+			Token: sessionToken,
 		})
 		if err != nil {
-			huma.WriteErr(api, ctx, 
-				http.StatusUnauthorized, 
-				"unauthorized", 
+			huma.WriteErr(api, ctx,
+				http.StatusUnauthorized,
+				"unauthorized",
 				fmt.Errorf("invalid token"),
 			)
 			return
@@ -38,17 +36,14 @@ func ClerkAuthMiddleware(api huma.API) HumaMiddleware {
 	}
 }
 
-
-func New(db *sql.DB) huma.API {
-	r := chi.NewMux()
+func New(db *sql.DB, imageService *images.Service) huma.API {
+	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.CleanPath)
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(middleware.Recoverer)
-	r.Use(clerkhttp.WithHeaderAuthorization())
-	
 
-	config := huma.DefaultConfig("My API", "1.0.0")
+	config := huma.DefaultConfig("Happened API", "1.0.0")
 	config.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
 		"BearerAuth": {
 			Type:         "http",
@@ -57,15 +52,15 @@ func New(db *sql.DB) huma.API {
 		},
 	}
 
-	api := humachi.New(r, config)
-	registerRoutes(api, db)
-
+	api := humachi.New(chi.NewRouter(), config)
+	registerRoutes(api, db, imageService)
 	return api
 }
 
 func registerRoutes(
 	api huma.API,
 	db *sql.DB,
+	imageService *images.Service,
 ) {
 
 	_ = db
@@ -76,21 +71,23 @@ func registerRoutes(
 		Summary:     "Get a greeting",
 		Description: "Get a greeting for a person by name.",
 		Tags:        []string{"Greetings"},
-	}, greetHandler())
+	}, GreetHandler())
 
 	huma.Register(api, huma.Operation{
 		OperationID: "protected-greet",
-		Method: http.MethodGet,
-		Path: "/greeting/protected/{name}",
-		Middlewares:        huma.Middlewares{ClerkAuthMiddleware(api)},
+		Method:      http.MethodGet,
+		Path:        "/greeting/protected/{name}",
+		Middlewares: huma.Middlewares{ClerkAuthMiddleware(api)},
 		Tags:        []string{"Greetings"},
-		Summary:            "Get a protected greeting",
-		Description:        "Protected version of greet",
-		Security:           []map[string][]string{
+		Summary:     "Get a protected greeting",
+		Description: "Protected version of greet",
+		Security: []map[string][]string{
 			{
 				"BearerAuth": {},
 			},
 		},
 	}, protectedGreetHandler())
-	
+
+	huma.Get(api, "/create-upload-url", CreateUploadURLHandler(imageService))
+
 }

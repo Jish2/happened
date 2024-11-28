@@ -14,6 +14,8 @@ default:
 	     exit 1; \
 	 fi
 
+test:
+	$(MAKE) -C api test
 deps:
 	@npm install -g orval
 

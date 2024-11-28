@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"happenedapi/pkg/images"
 	"happenedapi/pkg/server"
 	"log"
 	"log/slog"
@@ -16,7 +17,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/caarlos0/env/v11"
 	"github.com/clerk/clerk-sdk-go/v2"
-	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/humacli"
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
@@ -25,12 +25,12 @@ import (
 )
 
 type Config struct {
-	DbHost string `env:"DB_HOST"`
-	DbUser string `env:"DB_USER"`
-	DbPass string `env:"DB_PASS"`
-	DbName string `env:"DB_NAME"`
-	DbPort int    `env:"DB_PORT"`
-    ClerkSecretKey string `env:"CLERK_SECRET_KEY"`
+	DbHost         string `env:"DB_HOST"`
+	DbUser         string `env:"DB_USER"`
+	DbPass         string `env:"DB_PASS"`
+	DbName         string `env:"DB_NAME"`
+	DbPort         string `env:"DB_PORT"`
+	ClerkSecretKey string `env:"CLERK_SECRET_KEY"`
 }
 
 const (
@@ -51,22 +51,22 @@ const (
 	Production        = "production"
 )
 
-var api huma.API
-
 func main() {
+
+	// Create empty server for generating openapi.yaml with the CLI
+	api := server.New(nil, nil)
+
+	// Start up and stop hooks
 	cli := humacli.New(func(hooks humacli.Hooks, opts *Options) {
-		// Create empty server for generating openapi.yaml
-		ctx := context.Background()
-		api = server.New(nil)
 		var srv http.Server
-
-		if opts.Stage == Production {
-			slog.Info("launching server in production mode")
-		} else {
-			slog.Info("defaulting to server development mode")
-		}
-
 		hooks.OnStart(func() {
+			ctx := context.Background()
+
+			if opts.Stage == Production {
+				slog.Info("launching server in production mode")
+			} else {
+				slog.Info("defaulting to server development mode")
+			}
 			var err error
 			if opts.Stage == Development {
 				// Load .env
@@ -77,7 +77,6 @@ func main() {
 				}
 			}
 
-
 			// Parse env into config
 			var config Config
 			err = env.Parse(&config)
@@ -85,32 +84,32 @@ func main() {
 				slog.Error("parsing env to config", slog.Any("error", err))
 				os.Exit(1)
 			}
-            logger := slog.Default()
+			logger := slog.Default()
 
-            logger.Info("setting clerk secret key from environment config")
-            clerk.SetKey(config.ClerkSecretKey)
-			
+			logger.Info("setting clerk secret key from environment config")
+			clerk.SetKey(config.ClerkSecretKey)
+
 			logger.Info("config: ", slog.Any("config", config))
-            logger.Info("huma options: ", slog.Any("options", opts))
-			connString := pgConnString(config)
+			logger.Info("huma options: ", slog.Any("options", opts))
+
+			dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", config.DbUser, config.DbPass, config.DbHost, config.DbPort, config.DbName)
 
 			// Setup Dependencies
 			// Postgres
-			db, err := sql.Open("pgx", connString)
+			db, err := sql.Open("pgx", dbURL)
 			if err != nil {
 				slog.Error("opening database", slog.Any("error", err))
 				os.Exit(1)
 			}
-            logger.Info("pinging db")
+			logger.Info("pinging db")
 
-            dbctx, cancel := context.WithTimeout(ctx, time.Second * 5)
-            defer cancel()
+			dbctx, cancel := context.WithTimeout(ctx, time.Second*5)
+			defer cancel()
 			if err := db.PingContext(dbctx); err != nil {
 				slog.Error("pinging db", slog.Any("error", err))
 				os.Exit(1)
 			}
-            logger.Info("successfully pinged db")
-
+			logger.Info("successfully pinged db")
 
 			cfg, err := awsConfig.LoadDefaultConfig(ctx)
 			if err != nil {
@@ -120,10 +119,11 @@ func main() {
 
 			// Setup S3 bucket
 			s3Client := s3.NewFromConfig(cfg)
-			_ = s3Client
+			s3PresignClient := s3.NewPresignClient(s3Client)
+			imageService := images.NewService(s3PresignClient)
 
 			// Create server
-			api = server.New(db)
+			api = server.New(db, imageService)
 			srv = http.Server{
 				Addr:    fmt.Sprintf(":%d", Port),
 				Handler: api.Adapter(),
@@ -152,6 +152,7 @@ func main() {
 		})
 	})
 
+	// Additional command for generating the OpenAPI specification
 	cli.Root().AddCommand(&cobra.Command{
 		Use:   "openapi",
 		Short: "Print the OpenAPI spec",
@@ -165,13 +166,4 @@ func main() {
 	})
 
 	cli.Run()
-}
-
-func pgConnString(config Config) string {
-	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s",
-		config.DbHost,
-		config.DbPort,
-		config.DbUser,
-		config.DbPass,
-		config.DbName)
 }
