@@ -31,7 +31,6 @@ jobs:
           working-directory: api
 
   test:
-    needs: [lint]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -56,7 +55,7 @@ jobs:
         working-directory: api
 
   build:
-    needs: [test]
+    needs: [lint, test]
     runs-on: ubuntu-latest
     outputs:
       image_url: ${{ steps.push_image.outputs.image_url }}
