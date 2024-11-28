@@ -1,14 +1,10 @@
 name: Build and Deploy Preview
 run-name: CI - Pull Request
 on:
-  push:
-#   workflow_dispatch:
-#     inputs:
-#       debug_enabled:
-#         type: boolean
-#         description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
-#         required: false
-#         default: false
+  pull_request:
+    types:
+      - opened
+      - synchronize # Trigger on pushes to the PR branch
 
 jobs:
   test:
