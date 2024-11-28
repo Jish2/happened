@@ -105,7 +105,7 @@ jobs:
           DB_PORT: ${{ secrets.DB_PORT }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
         run: |-
-          ./generate.sh
+          ./generate.sh "happened-${{ github.head_ref}}"
           cat service.yaml
 
       - id: 'auth'

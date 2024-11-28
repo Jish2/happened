@@ -10,6 +10,14 @@ for var in "${REQUIRED_ENV_VARS[@]}"; do
   fi
 done
 
+# Ensure deployment name is provided as an argument
+if [ -z "$1" ]; then
+  echo "Error: Deployment name is required."
+  exit 1
+fi
+
+DEPLOYMENT_NAME=$1
+echo Deploying as "$DEPLOYMENT_NAME"
 
 
 # Write secrets to values.yaml
@@ -35,5 +43,5 @@ IMAGE="docker.io/anmho/happened:$COMMIT_HASH"
 SERVICE="happened-$BRANCH_NAME"
 helm template cloudrun \
     --debug \
-    --set name="$SERVICE" \
+    --set name="$DEPLOYMENT_NAME" \
     --set image="$IMAGE" > service.yaml
