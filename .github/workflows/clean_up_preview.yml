@@ -4,9 +4,14 @@ run-name: Clean Up Preview for ${{ github.head_ref }}
 
 on:
   pull_request:
+    branches-ignore:
+      - main
     types:
       - closed # Trigger when a pull request is closed (whether merged or not)
   delete:
+    branches-ignore:
+      - main
+
 
 jobs:
   metadata:
