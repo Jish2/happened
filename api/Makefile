@@ -1,10 +1,21 @@
 
+
 default: api
 
 .PHONY: watch migrate
 
 .PHONY: openapi
 openapi: # Generate OpenAPI specification
+deps:
+	@go install "github.com/air-verse/air@v1.61.1"
+	@brew tap golangci/tap
+	@brew install golangci/tap/golangci-lint
+
+check:
+	@go vet ./...
+	@golangci-lint run ./...
+
+openapi:
 	@./bin/api openapi > openapi.yaml
 
 
@@ -28,11 +39,17 @@ test:
 api:
 	@go build -o ./bin/api ./cmd/api
 
+
+IMAGE_NAME := anmho/happened
+GIT_COMMIT_HASH = $(shell git rev-parse --short HEAD)
+TAG ?= $(GIT_COMMIT_HASH)
 image:
-	docker build -t anmho/happened .
+	@docker build -t $(IMAGE_NAME):$(TAG) .
+	@echo docker.io/$(IMAGE_NAME):$(TAG) | tee image.txt
 
 push:
-	docker push anmho/happened
+	@docker push $(IMAGE_NAME):$(TAG)
+	@echo docker.io/$(IMAGE_NAME):$(TAG) | tee image.txt
 
 watch:
 	@air

@@ -54,6 +54,7 @@ func (s *Service) CreateUploadURL(
 		if len(values) > 0 {
 			headers[key] = values[0]
 		} else {
+			log.Println(values)
 			// should record this as a metric
 		}
 	}

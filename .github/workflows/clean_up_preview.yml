@@ -1,0 +1,37 @@
+name: Clean Up PR Preview Deployment
+run-name: Clean Up Preview for ${{ github.head_ref }}
+# Delete the preview deployment
+
+on:
+  pull_request:
+    types:
+      - closed # Trigger when a pull request is closed (whether merged or not)
+  delete:
+
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Check env
+        run: |
+          echo "base_ref ${{ github.base_ref }}"
+          echo "head_ref ${{ github.head_ref }}"
+          echo "ref ${{ github.ref }}"
+          echo "ref_name ${{ github.ref_name }}"
+          git rev-parse --abbrev-ref HEAD
+  delete_branch_preview:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+      - name: Handle pull request closed or branch deleted
+        working-directory: infra/helm
+        run: ./delete.sh "happened-${{ github.head_ref }}"

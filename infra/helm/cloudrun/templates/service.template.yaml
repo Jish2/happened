@@ -1,0 +1,38 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: {{ .Values.name }}
+  labels:
+    cloud.googleapis.com/location: {{ .Values.region }}
+
+spec:
+  template:
+    spec:
+      containers:
+        - image: {{ .Values.image }}
+          ports:
+            - name: http1
+              containerPort: {{ .Values.port }}
+          startupProbe:
+            httpGet:
+              path: /ping
+              port: {{ .Values.port }}
+            initialDelaySeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: {{ .Values.port }}
+          env:
+            - name: DB_HOST
+              value: {{ .Values.DB_HOST }}
+            - name: DB_NAME
+              value: {{ .Values.DB_NAME }}
+            - name: DB_PORT
+              value: '{{ .Values.DB_PORT }}'
+            - name: DB_USER
+              value: {{ .Values.DB_USER }}
+            - name: DB_PASS
+              value: {{ .Values.DB_PASS }}
+            - name: CLERK_SECRET_KEY
+              value: {{ .Values.CLERK_SECRET_KEY }}

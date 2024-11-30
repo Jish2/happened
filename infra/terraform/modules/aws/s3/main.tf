@@ -1,10 +1,3 @@
-
-
-
-provider "aws" {
-  region = var.region
-}
-
 # Create IAM user
 resource "aws_iam_user" "admin" {
   name = "happened-admin"  # Choose your username

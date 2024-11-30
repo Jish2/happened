@@ -16,6 +16,8 @@ default:
 
 test:
 	$(MAKE) -C api test
+
+.PHONY: gen
 deps:
 	@npm install -g orval
 
@@ -25,6 +27,7 @@ clean:
 watch:
 	$(MAKE) -C api watch
 
+.PHONY: gen
 # Generates the client SDK from the server's current OpenAPI spec.
 gen:
 	@$(MAKE) -C api openapi

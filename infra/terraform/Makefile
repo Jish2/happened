@@ -8,10 +8,11 @@ deps:
 init-tf:
 	@terraform init
 
-tf:
+apply:
 	@terraform apply
 
 destroy:
 	@terraform destroy
 
-
+fmt:
+	@terraform fmt

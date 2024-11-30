@@ -1,4 +1,3 @@
-
 # Output the bucket name and ARN
 output "bucket_name" {
   value = aws_s3_bucket.happened-bucket.id
@@ -24,6 +23,3 @@ output "iam_admin_secret" {
 output "aws_region" {
   value = var.region
 }
-
-
-

@@ -1,0 +1,4 @@
+name: happened-service
+region: us-west1
+image: docker.io/anmho/happened:6852438
+port: 8080

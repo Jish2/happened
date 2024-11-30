@@ -31,30 +31,26 @@ type Config struct {
 	DbName         string `env:"DB_NAME"`
 	DbPort         string `env:"DB_PORT"`
 	ClerkSecretKey string `env:"CLERK_SECRET_KEY"`
+	Port           int    `env:"PORT" envDefault:"8080"`
 }
-
-const (
-	Port = 8080
-)
 
 type Options struct {
 	Debug bool   `doc:"Enable debug logging"`
-	Host  string `doc:"Hostname to listen on."`
-	Port  int    `doc:"Port to listen on." short:"p" default:"8080"`
-	Stage string `doc:"environment" short:"s" default:"development"`
+	Stage string `doc:"environment" short:"s" default:"production"`
 }
 
 type Stage = string
 
 const (
 	Development Stage = "development"
-	Production        = "production"
+	Production  Stage = "production"
 )
 
 func main() {
 
 	// Create empty server for generating openapi.yaml with the CLI
 	api := server.New(nil, nil)
+	logger := slog.Default()
 
 	// Start up and stop hooks
 	cli := humacli.New(func(hooks humacli.Hooks, opts *Options) {
@@ -68,6 +64,19 @@ func main() {
 				slog.Info("defaulting to server development mode")
 			}
 			var err error
+			// Parse env into config
+			var config Config
+			err = env.Parse(&config)
+			if err != nil {
+				slog.Error("parsing env to config", slog.Any("error", err))
+				os.Exit(1)
+			}
+
+			logger.Info("config: ", slog.Any("config", config))
+			logger.Info("huma options: ", slog.Any("options", opts))
+
+			dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", config.DbUser, config.DbPass, config.DbHost, config.DbPort, config.DbName)
+
 			if opts.Stage == Development {
 				// Load .env
 				err := godotenv.Load(".env")
@@ -77,22 +86,8 @@ func main() {
 				}
 			}
 
-			// Parse env into config
-			var config Config
-			err = env.Parse(&config)
-			if err != nil {
-				slog.Error("parsing env to config", slog.Any("error", err))
-				os.Exit(1)
-			}
-			logger := slog.Default()
-
 			logger.Info("setting clerk secret key from environment config")
 			clerk.SetKey(config.ClerkSecretKey)
-
-			logger.Info("config: ", slog.Any("config", config))
-			logger.Info("huma options: ", slog.Any("options", opts))
-
-			dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", config.DbUser, config.DbPass, config.DbHost, config.DbPort, config.DbName)
 
 			// Setup Dependencies
 			// Postgres
@@ -125,14 +120,14 @@ func main() {
 			// Create server
 			api = server.New(db, imageService)
 			srv = http.Server{
-				Addr:    fmt.Sprintf(":%d", Port),
+				Addr:    fmt.Sprintf(":%d", config.Port),
 				Handler: api.Adapter(),
 			}
 
-			logger.Info("server listening", slog.Int("port", Port))
+			logger.Info("server listening", slog.Int("port", config.Port))
 			if err = srv.ListenAndServe(); err != nil {
 				if errors.Is(err, http.ErrServerClosed) {
-					slog.Info("shutting down server")
+					logger.Info("shutting down server")
 					os.Exit(0)
 				} else {
 					slog.Error("unexpected error", slog.Any("error", err))

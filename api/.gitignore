@@ -1,2 +1,4 @@
 .env
+image.txt
+.env.*
 .env.production

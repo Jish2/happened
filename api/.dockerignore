@@ -1,2 +1,12 @@
 
 /bin/
+.env
+.gitignore
+.docker-compose.yaml
+Dockerfile
+Makefile
+openapi.yaml
+README.md
+.air.toml
+/tmp/
+/sql/
