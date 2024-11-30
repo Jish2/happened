@@ -35,7 +35,7 @@ type Config struct {
 }
 
 type Options struct {
-	Debug bool `doc:"Enable debug logging"`
+	Debug bool   `doc:"Enable debug logging"`
 	Stage string `doc:"environment" short:"s" default:"production"`
 }
 
@@ -50,6 +50,7 @@ func main() {
 
 	// Create empty server for generating openapi.yaml with the CLI
 	api := server.New(nil, nil)
+	logger := slog.Default()
 
 	// Start up and stop hooks
 	cli := humacli.New(func(hooks humacli.Hooks, opts *Options) {
@@ -87,8 +88,6 @@ func main() {
 
 			logger.Info("setting clerk secret key from environment config")
 			clerk.SetKey(config.ClerkSecretKey)
-
-			connString := pgConnString(config)
 
 			// Setup Dependencies
 			// Postgres

@@ -11,13 +11,9 @@ import (
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 
 	"github.com/danielgtaylor/huma/v2"
-	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"happenedapi/pkg/images"
-
-	"net/http"
-	"strings"
 )
 
 type HumaMiddleware func(ctx huma.Context, next func(huma.Context))
@@ -62,7 +58,7 @@ func New(db *sql.DB, imageService *images.Service) huma.API {
 	}
 
 	api := humachi.New(r, config)
-	registerRoutes(api, db)
+	registerRoutes(api, db, imageService)
 
 	return api
 }
