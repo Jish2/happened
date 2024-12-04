@@ -110,7 +110,7 @@ jobs:
           DB_PORT: ${{ secrets.DB_PORT }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
         run: |-
-          ./generate.sh "happened-main
+          ./generate.sh "happened-main"
           cat service.yaml
 
       - name: 'Set up Cloud SDK'

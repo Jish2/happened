@@ -1,0 +1,25 @@
+name: Refresh Supabase
+
+on:
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  query-postgres:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install PostgreSQL Client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Query PostgreSQL
+        env:
+          PGHOST: ${{ secrets.DB_HOST }}
+          PGPORT: ${{ secrets.DB_PORT }}
+          PGDATABASE: ${{ secrets.DB_NAME }}
+          PGUSER: ${{ secrets.DB_USER }}
+          PGPASSWORD: ${{ secrets.DB_PASS }}
+        run: |
+          psql -c "SELECT 1"
