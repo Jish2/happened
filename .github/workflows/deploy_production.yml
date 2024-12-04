@@ -110,7 +110,7 @@ jobs:
           DB_PORT: ${{ secrets.DB_PORT }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
         run: |-
-          ./generate.sh "happened-${{ github.head_ref}}"
+          ./generate.sh "happened-main
           cat service.yaml
 
       - name: 'Set up Cloud SDK'
@@ -125,4 +125,4 @@ jobs:
         name: Deploy Preview with Cloud Run
         working-directory: infra/helm
         run: |
-          ./deploy.sh "happened-${{ github.head_ref }}"
+          ./deploy.sh "happened-main
