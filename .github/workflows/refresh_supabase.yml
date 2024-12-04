@@ -8,8 +8,8 @@ on:
 
 jobs:
   query-postgres:
+    environment: staging
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
