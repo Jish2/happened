@@ -4,7 +4,6 @@ on:
   push:
   schedule:
     - cron: '0 0 * * *' # Runs at midnight UTC every day
-  workflow_dispatch: # Allows manual triggering
 
 jobs:
   query-postgres:
