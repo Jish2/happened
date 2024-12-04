@@ -19,10 +19,6 @@ jobs:
 
       - name: Query PostgreSQL
         env:
-          PGHOST: ${{ secrets.DB_HOST }}
-          PGPORT: ${{ secrets.DB_PORT }}
-          PGDATABASE: ${{ secrets.DB_NAME }}
-          PGUSER: ${{ secrets.DB_USER }}
-          PGPASSWORD: ${{ secrets.DB_PASS }}
+          DB_URL: postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASS }}@${{ secrets.DB_HOST }}:${{ secrets.DB_PORT }}/${{ secrets.DB_NAME }}
         run: |
-          psql -c "SELECT 1"
+          psql ${{ env.DB_URL }}  -c "SELECT 1"
