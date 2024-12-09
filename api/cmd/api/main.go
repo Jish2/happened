@@ -73,7 +73,7 @@ func main() {
 					os.Exit(1)
 				}
 			}
-			
+
 			// Parse env into config
 			var err error
 			var config Config
@@ -115,7 +115,6 @@ func main() {
 				os.Exit(1)
 			}
 
-			
 			// Setup S3 bucket
 			s3Client := s3.NewFromConfig(cfg)
 			s3PresignClient := s3.NewPresignClient(s3Client)
