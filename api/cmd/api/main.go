@@ -63,28 +63,31 @@ func main() {
 			} else {
 				slog.Info("defaulting to server development mode")
 			}
-			var err error
+
+			if opts.Stage == Development {
+				// Load .env
+				logger.Info("loading .env")
+				err := godotenv.Load(".env")
+				if err != nil {
+					logger.Error("loading env", slog.Any("error", err))
+					os.Exit(1)
+				}
+			}
+			
 			// Parse env into config
+			var err error
 			var config Config
 			err = env.Parse(&config)
 			if err != nil {
-				slog.Error("parsing env to config", slog.Any("error", err))
+				logger.Error("parsing env to config", slog.Any("error", err))
 				os.Exit(1)
 			}
 
 			logger.Info("config: ", slog.Any("config", config))
 			logger.Info("huma options: ", slog.Any("options", opts))
 
+			// Create DB_URL
 			dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", config.DbUser, config.DbPass, config.DbHost, config.DbPort, config.DbName)
-
-			if opts.Stage == Development {
-				// Load .env
-				err := godotenv.Load(".env")
-				if err != nil {
-					slog.Error("loading env", slog.Any("error", err))
-					os.Exit(1)
-				}
-			}
 
 			logger.Info("setting clerk secret key from environment config")
 			clerk.SetKey(config.ClerkSecretKey)
@@ -93,7 +96,7 @@ func main() {
 			// Postgres
 			db, err := sql.Open("pgx", dbURL)
 			if err != nil {
-				slog.Error("opening database", slog.Any("error", err))
+				logger.Error("opening database", slog.Any("error", err))
 				os.Exit(1)
 			}
 			logger.Info("pinging db")
@@ -101,14 +104,14 @@ func main() {
 			dbctx, cancel := context.WithTimeout(ctx, time.Second*5)
 			defer cancel()
 			if err := db.PingContext(dbctx); err != nil {
-				slog.Error("pinging db", slog.Any("error", err))
+				logger.Error("pinging db", slog.Any("error", err))
 				os.Exit(1)
 			}
 			logger.Info("successfully pinged db")
 
 			cfg, err := awsConfig.LoadDefaultConfig(ctx)
 			if err != nil {
-				slog.Error("loading default aws config", slog.Any("error", err))
+				logger.Error("loading default aws config", slog.Any("error", err))
 				os.Exit(1)
 			}
 
@@ -130,7 +133,7 @@ func main() {
 					logger.Info("shutting down server")
 					os.Exit(0)
 				} else {
-					slog.Error("unexpected error", slog.Any("error", err))
+					logger.Error("unexpected error", slog.Any("error", err))
 					os.Exit(1)
 				}
 			}
