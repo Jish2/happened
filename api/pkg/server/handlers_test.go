@@ -2,16 +2,17 @@ package server_test
 
 import (
 	"fmt"
-	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/danielgtaylor/huma/v2/humatest"
-	"github.com/stretchr/testify/mock"
 	"happenedapi/pkg/images"
 	"happenedapi/pkg/images/mocks"
 	"happenedapi/pkg/server"
 	"happenedapi/pkg/test"
 	"net/http"
 	"testing"
+
+	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/danielgtaylor/huma/v2/humatest"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -74,10 +75,9 @@ func Test_CreateUploadURLHandler(t *testing.T) {
 			api := server.New(test.MakeLocalDB(t), images.NewService(mockS3PresignClient))
 			testapi := humatest.Wrap(t, api)
 
-			resp := testapi.Get("/create-upload-url", tc.params)
+			resp := testapi.Post("/create-upload-url", tc.params)
 			assert.Equal(t, tc.expectedStatusCode, resp.Code)
 
-			//require.True(t, false, "stop")
 			if !tc.expectedErr {
 				body := test.DecodeAs[server.CreateUploadURLBody](resp.Body, t)
 				assert.Equal(t, tc.expectedMethod, body.Method)
