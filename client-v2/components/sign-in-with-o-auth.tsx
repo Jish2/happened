@@ -38,7 +38,7 @@ export const SignInWithOAuth = () => {
         // Use signIn or signUp for next steps such as MFA
         console.log("session created but no further action taken");
       }
-      router.navigate("/(home)");
+      router.navigate("/(tabs)");
     } catch (err) {
       console.error("OAuth error", err);
     }

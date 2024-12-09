@@ -128,8 +128,8 @@ info:
 openapi: 3.1.0
 paths:
   /create-upload-url:
-    get:
-      operationId: get-create-upload-url
+    post:
+      operationId: post-create-upload-url
       requestBody:
         content:
           application/json:
@@ -149,7 +149,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
-      summary: Get create upload URL
+      summary: Post create upload URL
   /greeting/protected/{name}:
     get:
       description: Protected version of greet

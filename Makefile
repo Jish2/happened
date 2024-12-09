@@ -31,6 +31,6 @@ watch:
 # Generates the client SDK from the server's current OpenAPI spec.
 gen:
 	@$(MAKE) -C api openapi
-	@orval --input ./api/openapi.yaml --output ./client-v2/gen/openapi.ts
+	@orval --input ./api/openapi.yaml --output ./client-v2/lib/api/happened.ts
 
 
