@@ -1,4 +1,4 @@
-import { getGreeting } from "@/gen/openapi";
+import { getGreeting } from "@/lib/api/happened";
 import { SignedIn, SignedOut, useClerk, useUser } from "@clerk/clerk-expo";
 import axios, { AxiosError } from "axios";
 import { Link } from "expo-router";

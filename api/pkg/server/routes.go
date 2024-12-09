@@ -3,17 +3,19 @@ package server
 import (
 	"database/sql"
 	"fmt"
-	"github.com/clerk/clerk-sdk-go/v2/jwt"
 	"log/slog"
 	"net/http"
 	"strings"
 
+	"github.com/clerk/clerk-sdk-go/v2/jwt"
+
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
+
+	"happenedapi/pkg/images"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"happenedapi/pkg/images"
 )
 
 type HumaMiddleware func(ctx huma.Context, next func(huma.Context))
@@ -94,6 +96,6 @@ func registerRoutes(
 		},
 	}, protectedGreetHandler())
 
-	huma.Get(api, "/create-upload-url", CreateUploadURLHandler(imageService))
+	huma.Post(api, "/create-upload-url", CreateUploadURLHandler(imageService))
 
 }

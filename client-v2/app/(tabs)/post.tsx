@@ -4,6 +4,8 @@ import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { ImagePickerAsset } from "expo-image-picker";
 import * as Crypto from "expo-crypto";
+import { postCreateUploadUrl } from "@/lib/api/happened";
+import { uploadImage } from "@/lib/api/upload";
 
 export default function PostTab() {
   const [images, setImages] = useState<ImagePickerAsset[]>([]);
@@ -18,7 +20,7 @@ export default function PostTab() {
       selectionLimit: 10,
       exif: true,
     });
-    console.log(result);
+    // console.log(result);
     if (!result.canceled) {
       setImages(result.assets);
     }
@@ -40,25 +42,20 @@ export default function PostTab() {
 
       <TouchableOpacity
         onPress={async () => {
-          // try {
-          //   const imageKey = Crypto.randomUUID();
-          //   console.log("imageKey", imageKey);
-          //   // const { uploadUrl, headers, method } =
-          //     // await client.getUploadImageURL({
-          //     //   imageKey,
-          //     // });
-          //   // console.log("messages", images[0].base64);
-          //   // const res = await fetch(uploadUrl, {
-          //   //   headers: headers,
-          //   //   method
-          //   // })
-          //   // setUrl(uploadUrl);
-          //   console.log("uploadUrl", uploadUrl);
-          // } catch (e) {
-          //   if (e instanceof ConnectError) {
-          //     console.error(e.cause, e.details, e.code);
-          //   }
-          // }
+          const imageKey = Crypto.randomUUID();
+          const res = await postCreateUploadUrl({ image_key: imageKey }).catch(
+            console.error,
+          );
+
+          if (res) {
+            console.log("got response");
+
+            const { method, signed_headers, upload_url } = res.data;
+
+            console.log("data", res.data);
+
+            await uploadImage(upload_url, signed_headers, images[0].uri);
+          }
         }}
       >
         <Text>Upload Image</Text>

@@ -95,13 +95,14 @@ export interface CreateUploadURLBody {
 
 
   /**
- * @summary Get create upload URL
+ * @summary Post create upload URL
  */
-export const getCreateUploadUrl = <TData = AxiosResponse<CreateUploadURLBody>>(
+export const postCreateUploadUrl = <TData = AxiosResponse<CreateUploadURLBody>>(
     createUploadURLRequestBody: NonReadonly<CreateUploadURLRequestBody>, options?: AxiosRequestConfig
  ): Promise<TData> => {
-    return axios.get(
-      `/create-upload-url`,options
+    return axios.post(
+      `/create-upload-url`,
+      createUploadURLRequestBody,options
     );
   }
 
@@ -129,6 +130,6 @@ export const getGreeting = <TData = AxiosResponse<GreetingOutputBody>>(
     );
   }
 
-export type GetCreateUploadUrlResult = AxiosResponse<CreateUploadURLBody>
+export type PostCreateUploadUrlResult = AxiosResponse<CreateUploadURLBody>
 export type ProtectedGreetResult = AxiosResponse<GreetingOutputBody>
 export type GetGreetingResult = AxiosResponse<GreetingOutputBody>

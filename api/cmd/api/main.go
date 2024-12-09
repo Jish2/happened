@@ -109,12 +109,13 @@ func main() {
 			}
 			logger.Info("successfully pinged db")
 
-			cfg, err := awsConfig.LoadDefaultConfig(ctx)
+			cfg, err := awsConfig.LoadDefaultConfig(ctx, awsConfig.WithRegion("us-west-2"))
 			if err != nil {
 				logger.Error("loading default aws config", slog.Any("error", err))
 				os.Exit(1)
 			}
 
+			
 			// Setup S3 bucket
 			s3Client := s3.NewFromConfig(cfg)
 			s3PresignClient := s3.NewPresignClient(s3Client)
