@@ -44,7 +44,7 @@ export default function SignUpScreen() {
 
       if (completeSignUp.status === "complete") {
         await setActive({ session: completeSignUp.createdSessionId });
-        router.replace("/(home)");
+        router.replace("/(tabs)");
       } else {
         console.error(JSON.stringify(completeSignUp, null, 2));
       }
@@ -59,7 +59,7 @@ export default function SignUpScreen() {
     <View className="h-full justify-center pb-16">
       <View className="absolute left-4 top-8">
         <Pressable>
-          <Link href="/(home)">
+          <Link href="/(tabs)">
             <Ionicons name="chevron-back" size={32} color="black" />
           </Link>
         </Pressable>

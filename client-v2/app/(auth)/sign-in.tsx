@@ -63,7 +63,7 @@ export default function Page() {
 
       if (completeSignIn.status === "complete") {
         await setActive({ session: completeSignIn.createdSessionId });
-        router.replace("/(home)");
+        router.replace("/(tabs)");
       } else {
         // See https://clerk.com/docs/custom-flows/error-handling
         // for more info on error handling
@@ -79,7 +79,7 @@ export default function Page() {
     <View className="h-full justify-center pb-16">
       <View className="absolute left-4 top-8">
         <TouchableHighlight>
-          <Link href="/(home)">
+          <Link href="/(tabs)">
             <Ionicons name="chevron-back" size={32} color="black" />
           </Link>
         </TouchableHighlight>
