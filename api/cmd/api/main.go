@@ -48,6 +48,7 @@ const (
 
 func main() {
 
+	// test deploy PD
 	// Create empty server for generating openapi.yaml with the CLI
 	api := server.New(nil, nil)
 	logger := slog.Default()
