@@ -10,8 +10,6 @@ import { useMutation } from "@tanstack/react-query";
 export default function PostTab() {
   const [images, setImages] = useState<ImagePickerAsset[]>([]);
   // Access the client
-  // const queryClient = useQueryClient();
-
   // Queries
   const { isPending: isUploadPending, mutateAsync: uploadImagesMutation } =
     useMutation({
@@ -19,7 +17,6 @@ export default function PostTab() {
       onSuccess: () => console.log("successfully uploaded images"),
       onError: (e) => console.error(e),
     });
-  // uploadImagesMutation.mutate
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
