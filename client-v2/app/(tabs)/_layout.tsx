@@ -1,4 +1,5 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { BottomTabBarHeightCallbackContext } from "@react-navigation/bottom-tabs";
 import { Tabs } from "expo-router";
 
 export default function TabLayout() {
@@ -22,6 +23,7 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen name="post" />
     </Tabs>
   );
 }
