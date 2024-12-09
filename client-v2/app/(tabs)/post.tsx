@@ -3,12 +3,23 @@ import { Text, TouchableOpacity, Image } from "react-native";
 import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { ImagePickerAsset } from "expo-image-picker";
-import * as Crypto from "expo-crypto";
-import { postCreateUploadUrl } from "@/lib/api/happened";
-import { uploadImage } from "@/lib/api/upload";
+
+import { uploadImages } from "@/lib/api/upload";
+import { useMutation } from "@tanstack/react-query";
 
 export default function PostTab() {
   const [images, setImages] = useState<ImagePickerAsset[]>([]);
+  // Access the client
+  // const queryClient = useQueryClient();
+
+  // Queries
+  const { isPending: isUploadPending, mutateAsync: uploadImagesMutation } =
+    useMutation({
+      mutationFn: uploadImages,
+      onSuccess: () => console.log("successfully uploaded images"),
+      onError: (e) => console.error(e),
+    });
+  // uploadImagesMutation.mutate
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -42,24 +53,12 @@ export default function PostTab() {
 
       <TouchableOpacity
         onPress={async () => {
-          const imageKey = Crypto.randomUUID();
-          const res = await postCreateUploadUrl({ image_key: imageKey }).catch(
-            console.error,
-          );
-
-          if (res) {
-            console.log("got response");
-
-            const { method, signed_headers, upload_url } = res.data;
-
-            console.log("data", res.data);
-
-            await uploadImage(upload_url, signed_headers, images[0].uri);
-          }
+          uploadImagesMutation(images);
         }}
       >
         <Text>Upload Image</Text>
       </TouchableOpacity>
+      {isUploadPending && <Text>Uploading {images.length} images...</Text>}
     </SafeAreaView>
   );
 }
